@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->label1->setText("Welcome to the client program!");
 }
 
 MainWindow::~MainWindow()
