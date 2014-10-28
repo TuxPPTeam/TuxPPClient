@@ -1,10 +1,5 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-10-26T21:08:49
-#
-#-------------------------------------------------
-
-QT       += core gui
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,9 +9,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    serversession.cpp
+    serversession.cpp \
+    cryptor.cpp \
+    user.cpp
 
 HEADERS  += mainwindow.h \
-    serversession.h
+    serversession.h \
+    cryptor.h \
+    user.h
 
 FORMS    += mainwindow.ui

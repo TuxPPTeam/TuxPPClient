@@ -1,23 +1,26 @@
 #ifndef SERVERSESSION_H
 #define SERVERSESSION_H
 
+#include <QByteArray>
+#include <QSslSocket>
+
 class User
 {
-    pk_context key; //public key
+    rsa_context publicKey;
     std::string id;
 
 public:
-    std::string getId();
-    pk_context getKey();
+    QString getId();
+    rsa_context* getKey();
 };
 
 class ServerSession
 {
     std::string id;
     std::Vector<User> users;
-    QSslSocket server;
+    QObject::QSslSocket server;
 
-    rsa_context rsa_ctx;
+    rsa_context privateKey;
 
 public:
     ServerSession();
