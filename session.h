@@ -1,7 +1,7 @@
-#ifndef SERVERSESSION_H
-#define SERVERSESSION_H
+#ifndef SESSION_H
+#define SESSION_H
 
-#define SERVER_PORTNO 1234
+static const int PORT = 1234;
 
 #include <QByteArray>
 #include <QTcpServer>
@@ -9,7 +9,7 @@
 #include <vector>
 #include "user.h"
 
-class ServerSession
+class Session
 {
     std::string id;
     std::vector<User> users;
@@ -18,8 +18,8 @@ class ServerSession
     //rsa_context privateKey;
 
 public:
-    ServerSession();
-    ~ServerSession();
+    Session();
+    ~Session();
 
     //bool isConnected() { return server->listen(QHostAddress::LocalHost, SERVER_PORTNO); }
 
@@ -32,4 +32,4 @@ public:
     //std::vector<pk_context> getPublicKeys();
 };
 
-#endif // SERVERSESSION_H
+#endif // SESSION_H

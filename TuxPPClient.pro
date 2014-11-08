@@ -9,13 +9,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    serversession.cpp \
     cryptor.cpp \
-    user.cpp
+    user.cpp \
+    session.cpp
 
 HEADERS  += mainwindow.h \
-    serversession.h \
     cryptor.h \
-    user.h
+    user.h \
+    session.h
 
 FORMS    += mainwindow.ui

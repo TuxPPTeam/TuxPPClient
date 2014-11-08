@@ -16,7 +16,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_requestButton_clicked();
+    void on_connectButton_clicked();
+    
+    void on_fileDialogButton_clicked();
     
 private:
     Ui::MainWindow *ui;
