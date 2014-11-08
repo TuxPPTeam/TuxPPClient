@@ -16,6 +16,16 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QPushButton" name="requestButton">
+      <property name="text">
+       <string>Send request</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QLabel" name="label1">
       <property name="text">
        <string>Hello World!</string>
@@ -30,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
