@@ -9,25 +9,29 @@ static const int PORT = 1234;
 #include <vector>
 #include "user.h"
 
-class Session
-{
-    std::string id;
-    std::vector<User> users;
-    QSslSocket server;
+class Session {
+    
+    QString login;
+    QList<User> users;
+    QTcpSocket *server;
 
     //rsa_context privateKey;
 
 public:
-    Session();
+    Session(QString login, QString keyFileName);
     ~Session();
 
     //bool isConnected() { return server->listen(QHostAddress::LocalHost, SERVER_PORTNO); }
 
-    QByteArray sendRequest(User user);
+    void sendRequest(QString request);
 
     void createUserConnection(User user, QByteArray challenge/*, pk_context key*/);
 
     void sendData(User user, QByteArray data);
+    
+    bool isConnected();
+    
+    void connect();
 
     //std::vector<pk_context> getPublicKeys();
 };

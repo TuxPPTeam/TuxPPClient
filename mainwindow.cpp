@@ -4,15 +4,11 @@
 #include <QtDebug>
 #include <QFileDialog>
 
-Session * session;
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-//    session = new ServerSession();
 }
 
 MainWindow::~MainWindow()
@@ -22,9 +18,23 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::on_connectButton_clicked() {
-    qDebug() << "request button clicked";
-    User user;
-    session->sendRequest(user);
+    qDebug() << "connect button clicked";
+    
+    QString login = ui->loginLine->text();
+    QString fileName = ui->fileDialogLine->text();
+    if (session == nullptr) {
+        if (login.isEmpty() || fileName.isEmpty()) {
+            qDebug("missing login or file name");
+            return;
+        }
+        session = new Session(login, fileName);
+    }
+    if (!session->isConnected()) {
+        session->connect();
+    }
+    
+    session->sendRequest("whatever");
+//    session->sendRequest()
 }
 
 void MainWindow::on_fileDialogButton_clicked() {

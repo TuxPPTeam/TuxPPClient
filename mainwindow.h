@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "session.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -22,6 +23,7 @@ private slots:
     
 private:
     Ui::MainWindow *ui;
+    Session *session = nullptr;
 };
 
 #endif // MAINWINDOW_H

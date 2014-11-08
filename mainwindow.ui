@@ -58,6 +58,9 @@
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
+    <property name="text">
+     <string>dummyLogin</string>
+    </property>
    </widget>
    <widget class="QLabel" name="keyLabel">
     <property name="geometry">
@@ -80,6 +83,9 @@
       <width>113</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>dummyFile</string>
     </property>
     <property name="readOnly">
      <bool>true</bool>
