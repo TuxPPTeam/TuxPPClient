@@ -1,5 +1,5 @@
 #include "tests.h"
 
-Tests::Tests()
+void Tests::test1()
 {
 }

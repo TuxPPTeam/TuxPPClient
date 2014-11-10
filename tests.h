@@ -1,10 +1,13 @@
 #ifndef TESTS_H
 #define TESTS_H
 
-class Tests
+#include <QtTest/QtTest>
+
+class Tests: public QObject
 {
-public:
-    Tests();
+    Q_OBJECT
+private slots:
+    void test1();
 };
 
 #endif // TESTS_H

@@ -1,5 +1,6 @@
 QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra
 QT       += core gui network
+QT += testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,11 +12,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     cryptor.cpp \
     user.cpp \
-    client.cpp
+    client.cpp \
+    tests.cpp
 
 HEADERS  += mainwindow.h \
     cryptor.h \
     user.h \
-    client.h
+    client.h \
+    tests.h
 
 FORMS    += mainwindow.ui
