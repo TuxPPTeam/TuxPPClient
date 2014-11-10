@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "session.h"
+#include "client.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -18,12 +18,11 @@ public:
 
 private slots:
     void on_connectButton_clicked();
-    
     void on_fileDialogButton_clicked();
     
 private:
     Ui::MainWindow *ui;
-    Session *session = nullptr;
+    Client *client;
 };
 
 #endif // MAINWINDOW_H

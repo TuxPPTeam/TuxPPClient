@@ -1,19 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "session.h"
+#include "client.h"
 #include <QtDebug>
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    client(new Client(this))
 {
     ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
 {
-    delete session;
+    delete client;
     delete ui;
 }
 
@@ -22,18 +23,20 @@ void MainWindow::on_connectButton_clicked() {
     
     QString login = ui->loginLine->text();
     QString fileName = ui->fileDialogLine->text();
-    if (session == nullptr) {
+    if (client == nullptr) {
         if (login.isEmpty() || fileName.isEmpty()) {
             qDebug("missing login or file name");
             return;
         }
-        session = new Session(login, fileName);
+        client->setLogin(login);
+        client->setKeyFileName(fileName);
+        client->setReady(true);
     }
-    if (!session->isConnected()) {
-        session->connect();
+    if (!client->isConnected()) {
+        client->connect();
     }
     
-    session->sendRequest("whatever");
+    client->sendRequest("whatever");
 //    session->sendRequest()
 }
 

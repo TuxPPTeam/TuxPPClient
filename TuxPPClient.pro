@@ -11,11 +11,11 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     cryptor.cpp \
     user.cpp \
-    session.cpp
+    client.cpp
 
 HEADERS  += mainwindow.h \
     cryptor.h \
     user.h \
-    session.h
+    client.h
 
 FORMS    += mainwindow.ui
