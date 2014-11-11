@@ -9,17 +9,32 @@ Client::Client(QObject *parent) :
     server(new QTcpSocket(this))
 {}
 
-Client::~Client()
-{
-    delete server;
-}
+Client::~Client() {}
 
 void Client::sendRequest(QString request) {
-    QString message = "Hello||";
-//    server->waitForConnected();
-    qDebug() << "Server status:" << server->state();
-    int written = server->write(message.toLocal8Bit());
-    qDebug() << written;
+//    QString message = "Hello||";
+////    server->waitForConnected();
+//    qDebug() << "Server status:" << server->state();
+//    int written = server->write(message.toLocal8Bit());
+//    qDebug() << written;
+
+    QByteArray message(request.toLocal8Bit());
+//    QDataStream stream(message);
+//    stream << ECHO;
+//    stream << request;
+    command echo = ECHO;
+    message.prepend((char*) &echo, sizeof(command));
+    int written = server->write(message);
+    server->flush();
+//    qDebug() << server->waitForBytesWritten();
+    qDebug() << "Sending echo" << request;
+    qDebug() << "Written:" << written;
+
+    server->waitForReadyRead();
+    QByteArray received = server->readAll();
+    qDebug() << "Received:" << received;
+//    qDebug() << "Message type:" << received.at(0);
+//    qDebug() << "Message:" << received.mid(sizeof(command));
 }
 
 void Client::sendData(User user, QByteArray data) {
@@ -34,9 +49,8 @@ bool Client::isConnected() {
 }
 
 void Client::connect() {
-    server->connectToHost(QHostAddress::LocalHost, PORT);
-    server->waitForConnected();
-    qDebug() << "client connected to the server";
+    server->connectToHost("147.251.46.146", PORT, QIODevice::ReadWrite);
+    qDebug() << "Client connected:" << server->waitForConnected();
 }
 
 void Client::setLogin(QString newLogin) {

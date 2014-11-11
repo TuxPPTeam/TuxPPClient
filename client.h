@@ -33,6 +33,7 @@ private:
     bool ready;
     QList<User> users;
     QTcpSocket *server;
+    enum command { ECHO, LOGIN, LOGOUT };
 
 signals:
 
