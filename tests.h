@@ -2,12 +2,15 @@
 #define TESTS_H
 
 #include <QtTest/QtTest>
+#include "client.h"
 
 class Tests: public QObject
 {
     Q_OBJECT
 private slots:
-    void test1();
+    void testLogin();
+    void testKey();
+    void testServerConnection();
 };
 
 #endif // TESTS_H

@@ -13,6 +13,7 @@ class Client : public QObject
     Q_OBJECT
 public:
     explicit Client(QObject *parent = 0);
+    ~Client();
 
     //Session(QString login, QString keyFileName);
     void sendRequest(QString request);
@@ -21,7 +22,9 @@ public:
     bool isConnected();
     void connect();
     void setLogin(QString newLogin);
+    QString getLogin();
     void setKeyFileName(QString newKeyFileName);
+    QString getKeyFileName();
     void setReady(bool isReady) { ready = isReady; }
 
 private:

@@ -9,6 +9,11 @@ Client::Client(QObject *parent) :
     server(new QTcpSocket(this))
 {}
 
+Client::~Client()
+{
+    delete server;
+}
+
 void Client::sendRequest(QString request) {
     QString message = "Hello||";
 //    server->waitForConnected();
@@ -40,4 +45,12 @@ void Client::setLogin(QString newLogin) {
 
 void Client::setKeyFileName(QString newKeyFileName) {
     keyFile = newKeyFileName;
+}
+
+QString Client::getLogin() {
+    return login;
+}
+
+QString Client::getKeyFileName() {
+    return keyFile;
 }
