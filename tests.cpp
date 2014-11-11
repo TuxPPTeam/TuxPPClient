@@ -25,3 +25,28 @@ void Tests::testServerConnection()
     QVERIFY(client->isConnected() == true);
     delete client;
 }
+
+void Tests::testServerEcho()
+{
+    Client* client = new Client();
+    client->connect();
+    //todo
+    delete client;
+}
+
+/*void Tests::testClientConnection()
+{
+    QString message = "Hello!";
+
+    Client* client1 = new Client();
+    Client* client2 = new Client();
+
+    client1->connect();
+    client2->connect();
+
+    //client1->sendData(client2, message);
+    QVERIFY(client2->receiveData()? "" == message);
+
+    delete client1;
+    delete client2;
+}*/
