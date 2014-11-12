@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     client(new Client(this))
 {
     ui->setupUi(this);
+    connect(client, SIGNAL(dataRecieved(QByteArray)), this, SLOT(dataRecieved(QByteArray)));
 }
 
 MainWindow::~MainWindow()
@@ -18,12 +19,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::dataRecieved(QByteArray data) {
+    ui->outputBox->appendPlainText(data);
+    //ui->plainTextEdit->
+}
+
 void MainWindow::on_connectButton_clicked() {
     qDebug() << "connect button clicked";
     
-    QString login = ui->loginLine->text();
-    QString fileName = ui->fileDialogLine->text();
-    if (client == nullptr) {
+    QString login = ui->loginBox->text();
+    QString fileName = ui->fileBox->text();
+    if (client != nullptr) {
         if (login.isEmpty() || fileName.isEmpty()) {
             qDebug("missing login or file name");
             return;
@@ -36,7 +42,7 @@ void MainWindow::on_connectButton_clicked() {
         client->connect();
     }
     
-    client->sendRequest("whatever");
+    //client->sendRequest(REGISTER, "whatever");
 //    session->sendRequest()
 }
 
@@ -47,5 +53,20 @@ void MainWindow::on_fileDialogButton_clicked() {
         return;
     }
     qDebug() << "Key file:" << keyFileName;
-    ui->fileDialogLine->setText(keyFileName);
+    ui->fileBox->setText(keyFileName);
+}
+
+void MainWindow::on_loginButton_clicked()
+{
+    client->sendRequest(LOGIN, QString(client->getLogin()));
+}
+
+void MainWindow::on_logoutButton_clicked()
+{
+    client->sendRequest(LOGOUT, client->getLogin());
+}
+
+void MainWindow::on_getUsersButton_clicked()
+{
+    client->sendRequest(GETUSERS, "");
 }

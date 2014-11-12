@@ -1,6 +1,6 @@
 #include "client.h"
 
-#include <QTcpSocket>
+#include <QUdpSocket>
 #include <QTcpServer>
 
 Client::Client(QObject *parent) :
@@ -11,34 +11,27 @@ Client::Client(QObject *parent) :
 
 Client::~Client() {}
 
-void Client::sendRequest(QString request) {
-//    QString message = "Hello||";
-////    server->waitForConnected();
-//    qDebug() << "Server status:" << server->state();
-//    int written = server->write(message.toLocal8Bit());
-//    qDebug() << written;
+void Client::sendRequest(Command cmd, QString request) {
+    if (!isConnected()) {
+        qDebug() << "Cannot send data, disconnected from server.";
+        return;
+    }
 
     QByteArray message(request.toLocal8Bit());
-//    QDataStream stream(message);
-//    stream << ECHO;
-//    stream << request;
-    command echo = ECHO;
-    message.prepend((char*) &echo, sizeof(command));
+    message.prepend((char*)&cmd, sizeof(Command));
     int written = server->write(message);
-    server->flush();
-//    qDebug() << server->waitForBytesWritten();
-    qDebug() << "Sending echo" << request;
-    qDebug() << "Written:" << written;
+
+    qDebug() << "Sending echo." << request;
+    qDebug() << "Written: " << written << " bytes.";
 
     server->waitForReadyRead();
     QByteArray received = server->readAll();
-    qDebug() << "Received:" << received;
-//    qDebug() << "Message type:" << received.at(0);
-//    qDebug() << "Message:" << received.mid(sizeof(command));
+    emit dataRecieved(received);
+    qDebug() << "Received: " << received;
 }
 
 void Client::sendData(User user, QByteArray data) {
-    QTcpSocket sock;
+    QUdpSocket sock;
     sock.connectToHost(QHostAddress::LocalHost, PORT);
     sock.waitForConnected();
     sock.write(data);
@@ -48,9 +41,9 @@ bool Client::isConnected() {
     return server->state() == QTcpSocket::SocketState::ConnectedState;
 }
 
-void Client::connect() {
-    server->connectToHost("147.251.46.146", PORT, QIODevice::ReadWrite);
-    qDebug() << "Client connected:" << server->waitForConnected();
+bool Client::connect() {
+    server->connectToHost(serverAddress, PORT);
+    return server->waitForConnected();
 }
 
 void Client::setLogin(QString newLogin) {

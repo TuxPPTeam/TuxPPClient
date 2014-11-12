@@ -5,8 +5,12 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QHostAddress>
 
 static const int PORT = 1234;
+static const QHostAddress serverAddress = QHostAddress::LocalHostIPv6;
+
+enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS};
 
 class Client : public QObject
 {
@@ -16,11 +20,11 @@ public:
     ~Client();
 
     //Session(QString login, QString keyFileName);
-    void sendRequest(QString request);
+    void sendRequest(Command cmd, QString request);
     void createUserConnection(User user, QByteArray challenge/*, pk_context key*/);
     void sendData(User user, QByteArray data);
     bool isConnected();
-    void connect();
+    bool connect();
     void setLogin(QString newLogin);
     QString getLogin();
     void setKeyFileName(QString newKeyFileName);
@@ -33,11 +37,14 @@ private:
     bool ready;
     QList<User> users;
     QTcpSocket *server;
-    enum command { ECHO, LOGIN, LOGOUT };
+
 
 signals:
+    void dataRecieved(QByteArray);
 
 public slots:
+
+private slots:
 
 };
 
