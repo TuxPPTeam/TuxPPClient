@@ -21,7 +21,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::dataRecieved(QByteArray data) {
     ui->outputBox->appendPlainText(data);
-    //ui->plainTextEdit->
 }
 
 void MainWindow::on_connectButton_clicked() {
@@ -39,11 +38,13 @@ void MainWindow::on_connectButton_clicked() {
         client->setReady(true);
     }
     if (!client->isConnected()) {
-        client->connect();
+        if (client->connect()) {
+            ui->outputBox->appendPlainText("Connected");
+        }
+        else {
+            ui->outputBox->appendPlainText("Could not connect");
+        }
     }
-    
-    //client->sendRequest(REGISTER, "whatever");
-//    session->sendRequest()
 }
 
 void MainWindow::on_fileDialogButton_clicked() {
@@ -58,7 +59,7 @@ void MainWindow::on_fileDialogButton_clicked() {
 
 void MainWindow::on_loginButton_clicked()
 {
-    client->sendRequest(LOGIN, QString(client->getLogin()));
+    client->sendRequest(LOGIN, client->getLogin());
 }
 
 void MainWindow::on_logoutButton_clicked()
@@ -69,4 +70,14 @@ void MainWindow::on_logoutButton_clicked()
 void MainWindow::on_getUsersButton_clicked()
 {
     client->sendRequest(GETUSERS, "");
+}
+
+void MainWindow::on_registerButton_clicked()
+{
+    client->sendRequest(REGISTER, client->getLogin() + '\0' + client->getKeyFileName());
+}
+
+void MainWindow::on_clearButton_clicked()
+{
+    ui->outputBox->clear();
 }

@@ -28,6 +28,10 @@ private slots:
 
     void on_getUsersButton_clicked();
 
+    void on_registerButton_clicked();
+
+    void on_clearButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Client *client;

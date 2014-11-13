@@ -19,9 +19,8 @@ void Client::sendRequest(Command cmd, QString request) {
 
     QByteArray message(request.toLocal8Bit());
     message.prepend((char*)&cmd, sizeof(Command));
-    int written = server->write(message);
-
-    qDebug() << "Sending echo." << request;
+    qDebug() << "Sending: " << request;
+    int written = server->write(message);    
     qDebug() << "Written: " << written << " bytes.";
 
     server->waitForReadyRead();
