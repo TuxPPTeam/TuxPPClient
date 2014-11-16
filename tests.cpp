@@ -21,7 +21,7 @@ void Tests::testKey()
 void Tests::testServerConnection()
 {
     Client* client = new Client();
-    client->connect();
+    client->connectToServer();
     QVERIFY(client->isConnected() == true);
     delete client;
 }
@@ -29,7 +29,7 @@ void Tests::testServerConnection()
 void Tests::testServerEcho()
 {
     Client* client = new Client();
-    client->connect();
+    client->connectToServer();
     //todo
     delete client;
 }

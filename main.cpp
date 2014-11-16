@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "loginscreen.h"
 #include "tests.h"
 #include <QApplication>
 #include <QtTest/QtTest>
@@ -12,8 +13,10 @@ int main(int argc, char *argv[])
     return 0;
 #else
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    LoginScreen l;
+    l.show();
+    /*MainWindow w;
+    w.show();*/
 
     return a.exec();
 #endif

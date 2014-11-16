@@ -2,39 +2,42 @@
 #define MAINWINDOW_H
 
 #include "client.h"
-#include <QMainWindow>
+#include "userlistmodel.h"
+#include <QWidget>
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0, Client* client = 0);
     ~MainWindow();
+
+signals:
+    void closed();
 
 private slots:
     void dataRecieved(QByteArray);
 
+    void userListRecieved(QList<User*>);
+
     void on_connectButton_clicked();
-    void on_fileDialogButton_clicked();
-    
-    void on_loginButton_clicked();
 
     void on_logoutButton_clicked();
 
     void on_getUsersButton_clicked();
 
-    void on_registerButton_clicked();
-
     void on_clearButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+    UserListModel *model;
     Client *client;
+    QList<User*> users;
 };
 
 #endif // MAINWINDOW_H

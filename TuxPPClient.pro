@@ -13,12 +13,17 @@ SOURCES += main.cpp\
     cryptor.cpp \
     user.cpp \
     client.cpp \
-    tests.cpp
+    tests.cpp \
+    loginscreen.cpp \
+    userlistmodel.cpp
 
 HEADERS  += mainwindow.h \
     cryptor.h \
     user.h \
     client.h \
-    tests.h
+    tests.h \
+    loginscreen.h \
+    userlistmodel.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    loginscreen.ui

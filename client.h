@@ -9,6 +9,7 @@
 
 static const int PORT = 1234;
 static const QHostAddress serverAddress = QHostAddress::LocalHostIPv6;
+static const char commandDelimiter = '\0';
 
 enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS};
 
@@ -24,7 +25,7 @@ public:
     void createUserConnection(User user, QByteArray challenge/*, pk_context key*/);
     void sendData(User user, QByteArray data);
     bool isConnected();
-    bool connect();
+    bool connectToServer();
     void setLogin(QString newLogin);
     QString getLogin();
     void setKeyFileName(QString newKeyFileName);
@@ -35,17 +36,20 @@ private:
     QString login;
     QString keyFile;
     bool ready;
-    QList<User> users;
+    QList<User*> users;
     QTcpSocket *server;
 
+    void getUserList(QByteArray);
 
 signals:
     void dataRecieved(QByteArray);
+    void userListRecieved(QList<User*>);
+    void serverDisconnected();
 
 public slots:
 
 private slots:
-
+    void readyRead();
 };
 
 #endif // CLIENT_H
