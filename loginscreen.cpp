@@ -21,27 +21,29 @@ void LoginScreen::mainWindowClosed() {
 
 void LoginScreen::on_loginBtn_clicked()
 {
-
-
-    if (!ui->loginBox->text().isEmpty()) {
-        cl->setLogin(ui->loginBox->text());
-    }
-    else {
-        QMessageBox msg;
-        msg.setText("You have to fill login!");
-        msg.exec();
+    qDebug("LoginScreen::on_loginBtn_clicked()");
+    if (!validInputs()) {
         return;
     }
+//    if (!ui->loginBox->text().isEmpty()) {
+//        cl->setLogin(ui->loginBox->text());
+//    }
+//    else {
+//        QMessageBox msg;
+//        msg.setText("You have to fill login!");
+//        msg.exec();
+//        return;
+//    }
 
-    if (!ui->fileBox->text().isEmpty()) {
-        cl->setKeyFileName(ui->fileBox->text());
-    }
-    else {
-        QMessageBox msg;
-        msg.setText("You have to provide key file!");
-        msg.exec();
-        return;
-    }
+//    if (!ui->fileBox->text().isEmpty()) {
+//        cl->setKeyFileName(ui->fileBox->text());
+//    }
+//    else {
+//        QMessageBox msg;
+//        msg.setText("You have to provide key file!");
+//        msg.exec();
+//        return;
+//    }
 
     if (cl->connectToServer()) {
         w = new MainWindow(this, cl);
@@ -61,6 +63,7 @@ void LoginScreen::on_loginBtn_clicked()
 
 void LoginScreen::on_fileDialogBtn_clicked()
 {
+    qDebug("LoginScreen::on_fileBtn_clicked()");
     QString keyFileName = QFileDialog::getOpenFileName(this, tr("Choose key file"));
     if (keyFileName.isNull()) {
         qDebug("File not chosen");
@@ -68,4 +71,47 @@ void LoginScreen::on_fileDialogBtn_clicked()
     }
     qDebug() << "Key file:" << keyFileName;
     ui->fileBox->setText(keyFileName);
+}
+
+void LoginScreen::on_registerBtn_clicked()
+{
+    qDebug("LoginScreen::on_registerBtn_clicked()");
+    
+    if (!validInputs()) {
+        return;
+    }
+ 
+    if (cl->connectToServer()) {
+        cl->sendRequest(REGISTER, cl->getLogin());
+    }
+    else {
+        QMessageBox msg;
+        msg.setText("Error occured, could not contact the server.");
+        msg.exec();
+    }
+}
+
+bool LoginScreen::validInputs() {
+    qDebug("LoginScreen::validInputs()");
+    if (!ui->loginBox->text().isEmpty()) {
+        cl->setLogin(ui->loginBox->text());
+    }
+    else {
+        QMessageBox msg;
+        msg.setText("You have to fill login!");
+        msg.exec();
+        return false;
+    }
+
+    if (!ui->fileBox->text().isEmpty()) {
+        cl->setKeyFileName(ui->fileBox->text());
+    }
+    else {
+        QMessageBox msg;
+        msg.setText("You have to provide key file!");
+        msg.exec();
+        return false;
+    }
+    
+    return true;
 }

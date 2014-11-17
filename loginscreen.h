@@ -25,10 +25,14 @@ private slots:
 
     void on_fileDialogBtn_clicked();
 
+    void on_registerBtn_clicked();
+    
 private:
     Ui::LoginScreen *ui;
     Client *cl;
     MainWindow *w;
+    
+    bool validInputs();
 };
 
 #endif // LOGINSCREEN_H

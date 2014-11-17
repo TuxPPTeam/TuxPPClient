@@ -40,6 +40,7 @@ private:
     QTcpSocket *server;
 
     void getUserList(QByteArray);
+    void registerUser(QByteArray);
 
 signals:
     void dataRecieved(QByteArray);
