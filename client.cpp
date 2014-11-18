@@ -44,7 +44,7 @@ void Client::readyRead() {
         //case ECHO:      echo(data.mid(sizeof(Command)), socket); break;
         //case LOGIN:     login(data.mid(sizeof(Command)), socket); break;
         //case LOGOUT:    logout(data.mid(sizeof(Command)), socket); break;
-        case REGISTER:  registerUser(data.mid(sizeof(Command))); break;
+        case REGISTER:  registerUser(data.mid(sizeof(char*))); break;
         case GETUSERS:  getUserList(data.mid(sizeof(char*))); break;
         default:        emit dataRecieved(data);
     }

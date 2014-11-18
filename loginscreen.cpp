@@ -82,7 +82,7 @@ void LoginScreen::on_registerBtn_clicked()
     }
  
     if (cl->connectToServer()) {
-        cl->sendRequest(REGISTER, cl->getLogin());
+        cl->sendRequest(REGISTER, cl->getLogin() + commandDelimiter + cl->getKeyFileName());
     }
     else {
         QMessageBox msg;
