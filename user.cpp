@@ -1,11 +1,5 @@
 #include "user.h"
 
-User::User(QObject *parent) :
-    QObject(parent)
-{
-
-}
-
 User::User(QObject *parent, QString userName, /*qint32 host,*/ QByteArray pubKey, QHostAddress *socket) :
     QObject(parent)
 {
