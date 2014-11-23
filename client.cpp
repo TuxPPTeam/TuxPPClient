@@ -10,7 +10,9 @@ Client::Client(QObject *parent) :
     server(new QTcpSocket(this))
 {}
 
-Client::~Client() {}
+Client::~Client() {
+    sendRequest(LOGOUT, username);
+}
 
 void Client::sendRequest(Command cmd, QString request) {
     qDebug() << "Client::sendRequest()";
@@ -20,15 +22,11 @@ void Client::sendRequest(Command cmd, QString request) {
     }
 
     QByteArray message(request.toLocal8Bit());
-    message.prepend((char*)&cmd, sizeof(char*));
+    message.prepend((char*)&cmd, 1);
     qDebug() << "Sending: " << request;
-    int written = server->write(message);    
+    int written = server->write(message);
+    server->waitForBytesWritten();
     qDebug() << "Written: " << written << " bytes.";
-
-    /*server->waitForReadyRead();
-    QByteArray received = server->readAll();
-    emit dataRecieved(received);
-    qDebug() << "Received: " << received;*/
 }
 
 void Client::readyRead() {
@@ -42,29 +40,43 @@ void Client::readyRead() {
     switch (data.at(0))
     {
         //case ECHO:      echo(data.mid(sizeof(Command)), socket); break;
-        //case LOGIN:     login(data.mid(sizeof(Command)), socket); break;
+        case LOGIN:     login(data.mid(1)); break;
         //case LOGOUT:    logout(data.mid(sizeof(Command)), socket); break;
-        case REGISTER:  registerUser(data.mid(sizeof(char*))); break;
-        case GETUSERS:  getUserList(data.mid(sizeof(char*))); break;
+        case REGISTER:  registerUser(data.mid(1)); break;
+        case GETUSERS:  getUserList(data.mid(1)); break;
         default:        emit dataRecieved(data);
+    }
+}
+
+void Client::login(QByteArray data) {
+    qDebug() << "Client::login()";
+    if (data.length() < 1) {
+        emit displayMsg("Login", "Unknown response from server.");
+        return;
+    }
+
+    if (data[0] == '\1') {
+        emit loginSuccessful();
+    }
+    else {
+        emit displayMsg("Login", data.mid(1));
     }
 }
 
 void Client::registerUser(QByteArray data) {
     qDebug() << "Client::registerUser(): data size =" << data.size();
+    if (data.length() < 1) {
+        emit displayMsg("Registration", "Unknown response from server.");
+        return;
+    }
     
-    QString message = QString::fromLocal8Bit(data);
-    
-    QMessageBox mbox;
-    
-    if (message == "success") {
+    if (data[0] == '\1') {
         qDebug("Successful registration");
-        mbox.setText("Registration successful");
+        emit displayMsg("Registration", data.mid(1));
     } else {
         qDebug("Registration failed");
-        mbox.setText("Error: " + message);
+        emit displayMsg("Registration", data.mid(1));
     }
-    mbox.exec();
 }
 
 void Client::getUserList(QByteArray data) {
@@ -72,8 +84,8 @@ void Client::getUserList(QByteArray data) {
     QList<QByteArray> tokens = data.split(commandDelimiter);
 
     users.clear();
-    for (int i = 0; i < tokens.count() / 2; ++i) {
-        User *u = new User(this, tokens[i*2], NULL, new QHostAddress(QString(tokens[i*2+1])));
+    for (int i = 0; i < tokens.count() / 3; ++i) {
+        User *u = new User(this, tokens[i*2], tokens[i*2+1], new QHostAddress(QString(tokens[i*2+2])));
         users.append(u);
     }
 
@@ -106,7 +118,7 @@ bool Client::connectToServer() {
 
 void Client::setLogin(QString newLogin) {
     qDebug() << "Client::setLogin():" << newLogin;
-    login = newLogin;
+    username = newLogin;
 }
 
 void Client::setKeyFileName(QString newKeyFileName) {
@@ -116,7 +128,7 @@ void Client::setKeyFileName(QString newKeyFileName) {
 
 QString Client::getLogin() {
     qDebug("Client::getLogin()");
-    return login;
+    return username;
 }
 
 QString Client::getKeyFileName() {

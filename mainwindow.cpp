@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent, Client* client) :
 
 MainWindow::~MainWindow()
 {
-    client->sendRequest(LOGOUT, client->getLogin());
     delete ui;
 }
 
