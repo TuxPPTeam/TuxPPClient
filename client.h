@@ -43,6 +43,7 @@ private:
     QList<User*> users;
     QSocket *server;
     QUdpSocket *partner;
+    QByteArray lastMessage;
 
     void login(QByteArray);
     void getUserList(QByteArray);
