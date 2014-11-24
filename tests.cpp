@@ -67,9 +67,8 @@ void Tests::testEncryption()
     byte expected[] = "874d6191b620e3261bef6864990db6ce";
 
     Cryptor* c = new Cryptor(key, initVector, this);
-    c->process(input, result, 32);
+    c->process(input, result, 16);
 
-    for (int i = 0; i < 32; i++)
-        QVERIFY(result[i] == expected[i]);
+    QVERIFY(memcmp(result, expected, 32));
     delete c;
 }
