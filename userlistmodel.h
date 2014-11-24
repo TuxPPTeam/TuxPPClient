@@ -12,6 +12,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
     void setUsers(QList<User*> newUsers);
+    User* getUser(const QModelIndex &index);
 
 private:
     QList<User*> users;

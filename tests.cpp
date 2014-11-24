@@ -22,7 +22,7 @@ void Tests::testServerConnection()
 {
     Client* client = new Client();
     client->connectToServer();
-    QVERIFY(client->isConnected() == true);
+    QVERIFY(client->isServerConnected() == true);
     delete client;
 }
 

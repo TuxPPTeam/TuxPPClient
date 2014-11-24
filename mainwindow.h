@@ -4,6 +4,7 @@
 #include "client.h"
 #include "userlistmodel.h"
 #include <QWidget>
+//#include <QItemSelectionModel>
 
 namespace Ui {
 class MainWindow;
@@ -32,6 +33,8 @@ private slots:
     void on_getUsersButton_clicked();
 
     void on_clearButton_clicked();
+
+    void on_sendButton_clicked();
 
 private:
     Ui::MainWindow *ui;

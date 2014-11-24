@@ -41,7 +41,8 @@ private:
     QString keyFile;
     bool ready;
     QList<User*> users;
-    QTcpSocket *server;
+    QSocket *server;
+    QUdpSocket *partner;
 
     void login(QByteArray);
     void getUserList(QByteArray);

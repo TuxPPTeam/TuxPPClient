@@ -22,6 +22,8 @@ public:
 private slots:
     void on_loginBtn_clicked();
     void mainWindowClosed();
+    void loginSuccessful();
+    void displayMsg(QString, QString);
 
     void on_fileDialogBtn_clicked();
 

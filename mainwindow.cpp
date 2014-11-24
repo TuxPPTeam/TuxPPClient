@@ -2,22 +2,24 @@
 #include "ui_mainwindow.h"
 #include <QtDebug>
 #include <QFileDialog>
+#include <QListView>
+
+#include <QPlainTextEdit>
 
 MainWindow::MainWindow(QWidget *parent, Client* client) :
     QWidget(parent),
     ui(new Ui::MainWindow),
+    model(new UserListModel(this)),
     client(client)
 {
     ui->setupUi(this);
     connect(client, SIGNAL(dataRecieved(QByteArray)), this, SLOT(dataRecieved(QByteArray)));
     connect(client, SIGNAL(userListRecieved(QList<User*>)), this, SLOT(userListRecieved(QList<User*>)));
-    model = new UserListModel(this);
     ui->listView->setModel(model);
 }
 
 MainWindow::~MainWindow()
 {
-    client->sendRequest(LOGOUT, client->getLogin());
     delete ui;
 }
 
@@ -47,5 +49,17 @@ void MainWindow::on_clearButton_clicked()
 
 void MainWindow::on_connectButton_clicked()
 {
-    //ui->userList;
+    QModelIndex index = ui->listView->currentIndex();
+    User *u = model->getUser(index);
+    if (u != NULL) {
+        client->createUserConnection(u);
+    }
+}
+
+void MainWindow::on_sendButton_clicked()
+{
+    //QPlainTextEdit::toPlainText().toLocal8Bit()
+    if (client->isClientConnected()) {
+        client->sendData(ui->inputBox->toPlainText().toLocal8Bit());
+    }
 }
