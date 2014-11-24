@@ -16,6 +16,7 @@ enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS};
 class Client : public QObject
 {
     Q_OBJECT
+    friend class Tests;
 public:
     explicit Client(QObject *parent = 0);
     ~Client();
@@ -38,12 +39,14 @@ private:
     bool ready;
     QList<User*> users;
     QTcpSocket *server;
+    QByteArray lastMessage;
 
     void getUserList(QByteArray);
     void registerUser(QByteArray);
 
 signals:
     void dataRecieved(QByteArray);
+    void messageReceived();
     void userListRecieved(QList<User*>);
     void serverDisconnected();
 

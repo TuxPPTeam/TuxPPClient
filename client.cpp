@@ -34,6 +34,11 @@ void Client::sendRequest(Command cmd, QString request) {
 void Client::readyRead() {
     qDebug() << "Client::readyRead()";
     QByteArray data = server->readAll();
+//#define TEST
+#ifdef TEST
+    lastMessage = data;
+    emit(messageReceived());
+#else
     if (data.isEmpty()) {
         qDebug("readyRead(): no data received");
         return;
@@ -48,6 +53,7 @@ void Client::readyRead() {
         case GETUSERS:  getUserList(data.mid(sizeof(char*))); break;
         default:        emit dataRecieved(data);
     }
+#endif
 }
 
 void Client::registerUser(QByteArray data) {
