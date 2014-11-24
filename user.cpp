@@ -43,10 +43,6 @@ bool User::setUsername(const QString newUsername) {
     }
 }
 
-/*void User::setHost(const qint32 newHost) {
-    host = newHost;
-}*/
-
 void User::setPubKey(const QByteArray newPubKey) {
     pubKey = newPubKey;
 }

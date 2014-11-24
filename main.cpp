@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <QtTest/QtTest>
 
+//#define TEST
+
 int main(int argc, char *argv[])
 {
 #ifdef TEST
