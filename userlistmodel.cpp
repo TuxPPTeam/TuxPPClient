@@ -29,3 +29,10 @@ void UserListModel::setUsers(QList<User *> newUsers) {
     users = newUsers;
     endResetModel();
 }
+
+User* UserListModel::getUser(const QModelIndex &index) {
+    if (index.isValid())
+        if (index.row() <= users.count())
+            return users[index.row()];
+    return NULL;
+}

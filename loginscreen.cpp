@@ -11,6 +11,7 @@ LoginScreen::LoginScreen(QWidget *parent) :
 
 LoginScreen::~LoginScreen()
 {
+    cl->sendRequest(LOGOUT, cl->getLogin());
     delete ui;
 }
 

@@ -6,24 +6,22 @@ User::User(QObject *parent) :
 
 }
 
-User::User(QObject *parent, QString userName, /*qint32 host,*/ QByteArray pubKey, QHostAddress *socket) :
+User::User(QObject *parent, QString userName, QByteArray pubKey, QHostAddress host) :
     QObject(parent)
 {
     this->ID = -1;
     setUsername(userName);
-    //setHost(host);
     this->pubKey = pubKey;
-    this->host = socket;
+    this->host = host;
 }
 
-User::User(QObject *parent, qint64 ID, QString userName, /*qint32 host,*/ QByteArray pubKey, QHostAddress *socket) :
+User::User(QObject *parent, qint64 ID, QString userName, QByteArray pubKey, QHostAddress host) :
     QObject(parent)
 {
     setID(ID);
     setUsername(userName);
-    //setHost(host);
     this->pubKey = pubKey;
-    this->host = socket;
+    this->host = host;
 }
 
 // #################################################################################
@@ -53,8 +51,8 @@ void User::setPubKey(const QByteArray newPubKey) {
     pubKey = newPubKey;
 }
 
-void User::setSocket(QHostAddress *newSocket) {
-    host = newSocket;
+void User::setHost(QHostAddress newHost) {
+    host = newHost;
 }
 
 // #########################################################################
@@ -66,15 +64,11 @@ QString User::getUsername() const {
     return username;
 }
 
-/*qint32 User::getHost() const {
-    return host;
-}*/
-
 QByteArray User::getPubKey() const {
     return pubKey;
 }
 
-QHostAddress* User::getSocket() const {
+QHostAddress User::getHost() const {
     return host;
 }
 

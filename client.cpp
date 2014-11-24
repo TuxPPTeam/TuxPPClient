@@ -7,8 +7,11 @@
 Client::Client(QObject *parent) :
     QObject(parent),
     ready(false),
-    server(new QTcpSocket(this))
-{}
+    server(new QTcpSocket(this)),
+    partner(new QUdpSocket(this))
+{
+    connect(partner, SIGNAL(connected()), this, SLOT(clientConnectionEstablished()));
+}
 
 Client::~Client() {
     sendRequest(LOGOUT, username);
@@ -16,7 +19,7 @@ Client::~Client() {
 
 void Client::sendRequest(Command cmd, QString request) {
     qDebug() << "Client::sendRequest()";
-    if (!isConnected()) {
+    if (!isServerConnected()) {
         qDebug() << "Cannot send data, disconnected from server.";
         return;
     }
@@ -29,7 +32,7 @@ void Client::sendRequest(Command cmd, QString request) {
     qDebug() << "Written: " << written << " bytes.";
 }
 
-void Client::readyRead() {
+void Client::serverReadyRead() {
     qDebug() << "Client::readyRead()";
     QByteArray data = server->readAll();
     if (data.isEmpty()) {
@@ -85,35 +88,56 @@ void Client::getUserList(QByteArray data) {
 
     users.clear();
     for (int i = 0; i < tokens.count() / 3; ++i) {
-        User *u = new User(this, tokens[i*2], tokens[i*2+1], new QHostAddress(QString(tokens[i*2+2])));
+        User *u = new User(this, tokens[i*3], tokens[i*3+1], QHostAddress(QString(tokens[i*3+2])));
         users.append(u);
     }
 
     emit userListRecieved(users);
 }
 
-void Client::sendData(User user, QByteArray data) {
-    qDebug() << "Client::sendData()";
-    QUdpSocket sock;
-    sock.connectToHost(QHostAddress::LocalHost, PORT);
-    sock.waitForConnected();
-    sock.write(data);
+bool Client::sendData(QByteArray data) {
+    bool result;
+    if (partner->isWritable()) {
+        result = partner->write(data);
+    }
+
+    return result;
 }
 
-bool Client::isConnected() {
-    qDebug() << "Client::isConnected()";
-    return server->state() == QTcpSocket::SocketState::ConnectedState;
+bool Client::isServerConnected() {
+    qDebug() << "Client::isServerConnected()";
+    return server->isOpen();
+}
+
+bool Client::isClientConnected() {
+    qDebug() << "Client::isClientConnected()";
+    return partner->isOpen();
 }
 
 bool Client::connectToServer() {
     qDebug() << "Client::connectToServer()";
-    server->connectToHost(serverAddress, PORT);
+    server->connectToHost(serverAddress, SERVER_PORT);
     bool res = server->waitForConnected();
     if (res) {
         connect(server, SIGNAL(disconnected()), this, SIGNAL(serverDisconnected()));
-        connect(server, SIGNAL(readyRead()), this, SLOT(readyRead()));
+        connect(server, SIGNAL(readyRead()), this, SLOT(serverReadyRead()));
     }
     return res;
+}
+
+bool Client::createUserConnection(User *user) {
+    partner->connectToHost(user->getHost(), CLIENT_PORT);
+    return partner->waitForConnected();
+}
+
+void Client::clientReadyRead() {
+    while (partner->hasPendingDatagrams()) {
+        emit dataRecieved(partner->readAll());
+    }
+}
+
+void Client::clientConnectionEstablished() {
+    connect(partner, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
 }
 
 void Client::setLogin(QString newLogin) {
@@ -134,4 +158,8 @@ QString Client::getLogin() {
 QString Client::getKeyFileName() {
     qDebug("Client::getKeyFileName()");
     return keyFile;
+}
+
+int Client::getUsersCount() {
+    return users.count();
 }
