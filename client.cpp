@@ -96,7 +96,7 @@ void Client::getUserList(QByteArray data) {
 }
 
 bool Client::sendData(QByteArray data) {
-    bool result;
+    bool result = false;
     if (partner->isWritable()) {
         result = partner->write(data);
     }

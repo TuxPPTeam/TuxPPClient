@@ -15,7 +15,11 @@ SOURCES += main.cpp\
     client.cpp \
     tests.cpp \
     loginscreen.cpp \
-    userlistmodel.cpp
+    userlistmodel.cpp \
+    aes.c \
+    havege.c \
+    sha512.c \
+    timing.c
 
 HEADERS  += mainwindow.h \
     cryptor.h \
@@ -23,7 +27,13 @@ HEADERS  += mainwindow.h \
     client.h \
     tests.h \
     loginscreen.h \
-    userlistmodel.h
+    userlistmodel.h \
+    polarssl/aes.h \
+    polarssl/check_config.h \
+    polarssl/config.h \
+    polarssl/havege.h \
+    polarssl/sha512.h \
+    polarssl/timing.h
 
 FORMS    += mainwindow.ui \
     loginscreen.ui

@@ -9,8 +9,8 @@
 MainWindow::MainWindow(QWidget *parent, Client* client) :
     QWidget(parent),
     ui(new Ui::MainWindow),
-    client(client),
-    model(new UserListModel(this))
+    model(new UserListModel(this)),
+    client(client)
 {
     ui->setupUi(this);
     connect(client, SIGNAL(dataRecieved(QByteArray)), this, SLOT(dataRecieved(QByteArray)));
