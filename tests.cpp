@@ -35,7 +35,7 @@ void Tests::testServerEcho()
     client->connectToServer();
     QString message = "abcd";
     client->sendRequest(ECHO, message);
-    loop.exec();
+    //loop.exec();
     qDebug() << "Last message:" << client->lastMessage;
     QVERIFY(message == client->lastMessage);
     delete client;
@@ -60,5 +60,16 @@ void Tests::testClientConnection()
 
 void Tests::testEncryption()
 {
-    QVERIFY(false);
+    byte key[] = "2b7e151628aed2a6abf7158809cf4f3c";
+    byte initVector[] = "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
+    byte input[] = "6bc1bee22e409f96e93d7e117393172a";
+    byte result[] = "00000000000000000000000000000000";
+    byte expected[] = "874d6191b620e3261bef6864990db6ce";
+
+    Cryptor* c = new Cryptor(key, initVector, this);
+    c->process(input, result, 32);
+
+    for (int i = 0; i < 32; i++)
+        QVERIFY(result[i] == expected[i]);
+    delete c;
 }

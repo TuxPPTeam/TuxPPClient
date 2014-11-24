@@ -3,6 +3,7 @@
 
 #include <QtTest/QtTest>
 #include "client.h"
+#include "cryptor.h"
 
 class Tests: public QObject
 {
