@@ -15,6 +15,8 @@ private slots:
     void testServerEcho();
     void testClientConnection();
     void testEncryption();
+    void testDecryption();
+    void testCryptoSpeed();
 };
 
 #endif // TESTS_H

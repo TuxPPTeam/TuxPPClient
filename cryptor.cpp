@@ -33,7 +33,7 @@ Cryptor::~Cryptor() {
 }
 
 size_t Cryptor::process(byte *in, byte *out, size_t size) {
-    qDebug() << "Cryptor::process: size =" << size;
+    //qDebug() << "Cryptor::process: size =" << size;
     
     size_t processedBytes = qMin(size, availableBytes);
 
@@ -71,7 +71,7 @@ size_t Cryptor::precompute(size_t num) {
 }
 
 void Cryptor::precomputeCheck(size_t wantedBytes) {
-    qDebug() << "Cryptor::precomputeCheck";
+    //qDebug() << "Cryptor::precomputeCheck";
     if (precompResult.isFinished() && newBytes > 0) {
         availableBytes += newBytes;
         newBytes = 0;
