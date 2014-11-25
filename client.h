@@ -26,6 +26,7 @@ public:
 
     void sendRequest(Command cmd, QString request);
     bool createUserConnection(User *user);
+    void closeUserConnection();
     bool sendData(QByteArray data);
     bool isServerConnected();
     bool isClientConnected();

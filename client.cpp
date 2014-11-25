@@ -8,7 +8,8 @@ Client::Client(QObject *parent) :
     QObject(parent),
     ready(false),
     server(new QTcpSocket(this)),
-    partner(NULL)
+    partner(NULL),
+    partnerSocket(NULL)
 {
 }
 
@@ -98,7 +99,7 @@ void Client::getUserList(QByteArray data) {
 
 bool Client::sendData(QByteArray data) {
     int result;
-    if (isClientConnected()) {
+    if (partnerSocket != NULL && partner != NULL) {
         result = partnerSocket->writeDatagram(data, data.length(), partner->getHost(), CLIENT_PORT);
     }
     return result > 0;
@@ -127,10 +128,22 @@ bool Client::connectToServer() {
 
 bool Client::createUserConnection(User *user) {
     partner = user;
-    partnerSocket = new QUdpSocket(this);
-    bool res = partnerSocket->bind(partner->getHost(), CLIENT_PORT);
-    connect(partnerSocket, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
+    bool res;
+    if (partnerSocket == NULL) {
+        partnerSocket = new QUdpSocket(this);
+        res = partnerSocket->bind(partner->getHost(), CLIENT_PORT);
+        connect(partnerSocket, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
+    }
+    qDebug() << "Binding error: " << partnerSocket->errorString();
+
     return res;
+}
+
+void Client::closeUserConnection() {
+    partner = NULL;
+    partnerSocket->close();
+    delete partnerSocket;
+    partnerSocket = NULL;
 }
 
 void Client::clientReadyRead() {
@@ -138,7 +151,7 @@ void Client::clientReadyRead() {
         QByteArray data;
         data.resize(partnerSocket->pendingDatagramSize());
         partnerSocket->readDatagram(data.data(), partnerSocket->pendingDatagramSize());
-        emit dataRecieved(partnerSocket->readAll());
+        emit dataRecieved(data);
     }
 }
 

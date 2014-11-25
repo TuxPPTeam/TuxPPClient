@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent, Client* client) :
     connect(client, SIGNAL(dataRecieved(QByteArray)), this, SLOT(dataRecieved(QByteArray)));
     connect(client, SIGNAL(userListRecieved(QList<User*>)), this, SLOT(userListRecieved(QList<User*>)));
     ui->listView->setModel(model);
+    ui->loggedLabel->setText("Logged as: " + client->getLogin());
+    ui->connectedLabel->setText("Connected to: ");
 }
 
 MainWindow::~MainWindow()
@@ -52,14 +54,23 @@ void MainWindow::on_connectButton_clicked()
     QModelIndex index = ui->listView->currentIndex();
     User *u = model->getUser(index);
     if (u != NULL) {
-        client->createUserConnection(u);
+        if (client->createUserConnection(u)) {
+            ui->connectedLabel->setText("Connected to: " + u->getUsername());
+        }
     }
 }
 
 void MainWindow::on_sendButton_clicked()
 {
-    //QPlainTextEdit::toPlainText().toLocal8Bit()
     if (client->isClientConnected()) {
-        client->sendData(ui->inputBox->toPlainText().toLocal8Bit());
+        if (client->sendData(ui->inputBox->toPlainText().toLocal8Bit())) {
+            ui->inputBox->clear();
+        }
     }
+}
+
+void MainWindow::on_disconnectButton_clicked()
+{
+    client->closeUserConnection();
+    ui->connectedLabel->setText("Connected to: ");
 }
