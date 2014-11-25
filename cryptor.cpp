@@ -78,7 +78,7 @@ void Cryptor::precomputeCheck(size_t wantedBytes) {
     }
     if (availableBytes < THRESHOLD && !precompResult.isRunning()) {
 //        watcher.waitForFinished();
-        qDebug() << "Cryptor::precomputeCheck starting precomputation";
+        //qDebug() << "Cryptor::precomputeCheck starting precomputation";
         precompResult = QtConcurrent::run(this, &Cryptor::precompute, wantedBytes);
 //        watcher.setFuture(precompResult);
     }

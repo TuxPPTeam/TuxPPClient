@@ -32,7 +32,7 @@ void Tests::testServerEcho()
     client->connectToServer();
     QString message = "abcd";
     client->sendRequest(ECHO, message);
-    QTest::qSleep(1000);
+    QTest::qSleep(10000);
     qDebug() << "Last message:" << client->lastMessage;
     QVERIFY(message == client->lastMessage);
     delete client;
@@ -101,7 +101,7 @@ void Tests::testCryptoSpeed()
     //"2b7e151628aed2a6abf7158809cf4f3c"
     byte initVector[] = { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
     //"f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
-    size_t MEGABITES = 100;
+    size_t MEGABITES = 300;
 
     Cryptor* c = new Cryptor(key, initVector, this);
     c->benchmark(MEGABITES);

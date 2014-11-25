@@ -11,6 +11,7 @@
 static const int SERVER_PORT = 1234;
 static const int CLIENT_PORT = 4321;
 static const QHostAddress serverAddress = QHostAddress::LocalHostIPv6;
+//static const QHostAddress serverAddress("147.251.44.155");
 static const char commandDelimiter = '\31';
 
 enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS };

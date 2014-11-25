@@ -4,22 +4,19 @@
 #include <QApplication>
 #include <QtTest/QtTest>
 
-//#define TEST
+#define TEST
 
 int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
 #ifdef TEST
     Tests t;
     QTest::qExec(&t);
-
-    return 0;
 #else
-    QApplication a(argc, argv);
     LoginScreen l;
     l.show();
     /*MainWindow w;
     w.show();*/
-
-    return a.exec();
 #endif
+    return a.exec();
 }
