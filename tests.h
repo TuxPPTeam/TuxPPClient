@@ -13,7 +13,7 @@ private slots:
     void testKey();
     void testServerConnection();
     void testServerEcho();
-    void testClientConnection();
+    //void testClientConnection();
     void testEncryption();
     void testDecryption();
     void testCryptoSpeed();

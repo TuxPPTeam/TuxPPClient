@@ -42,7 +42,8 @@ private:
     bool ready;
     QList<User*> users;
     QSocket *server;
-    QUdpSocket *partner;
+    QUdpSocket *partnerSocket;
+    User *partner;
     QByteArray lastMessage;
 
     void login(QByteArray);
@@ -51,7 +52,6 @@ private:
 
 signals:
     void dataRecieved(QByteArray);
-    void messageReceived();
     void userListRecieved(QList<User*>);
     void serverDisconnected();
     void displayMsg(QString, QString);
@@ -62,7 +62,6 @@ public slots:
 private slots:
     void serverReadyRead();
     void clientReadyRead();
-    void clientConnectionEstablished();
 };
 
 #endif // CLIENT_H

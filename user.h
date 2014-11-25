@@ -15,7 +15,6 @@ class User : public QObject
 {
     Q_OBJECT
 public:
-    explicit User(QObject *parent = 0);
     explicit User(QObject *parent = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
     explicit User(QObject *parent = 0, qint64 = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
 

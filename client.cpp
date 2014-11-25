@@ -8,9 +8,8 @@ Client::Client(QObject *parent) :
     QObject(parent),
     ready(false),
     server(new QTcpSocket(this)),
-    partner(new QUdpSocket(this))
+    partner(NULL)
 {
-    connect(partner, SIGNAL(connected()), this, SLOT(clientConnectionEstablished()));
 }
 
 Client::~Client() {
@@ -35,10 +34,9 @@ void Client::sendRequest(Command cmd, QString request) {
 void Client::serverReadyRead() {
     qDebug() << "Client::readyRead()";
     QByteArray data = server->readAll();
-//#define TEST
+#define TEST
 #ifdef TEST
     lastMessage = data;
-    emit(messageReceived());
 #else
     if (data.isEmpty()) {
         qDebug("readyRead(): no data received");
@@ -102,12 +100,11 @@ void Client::getUserList(QByteArray data) {
 }
 
 bool Client::sendData(QByteArray data) {
-    bool result = false;
-    if (partner->isWritable()) {
-        result = partner->write(data);
+    int result;
+    if (isClientConnected()) {
+        result = partnerSocket->writeDatagram(data, data.length(), partner->getHost(), CLIENT_PORT);
     }
-
-    return result;
+    return result > 0;
 }
 
 bool Client::isServerConnected() {
@@ -117,7 +114,7 @@ bool Client::isServerConnected() {
 
 bool Client::isClientConnected() {
     qDebug() << "Client::isClientConnected()";
-    return partner->isOpen();
+    return partnerSocket != NULL && partnerSocket->state() == QAbstractSocket::BoundState;
 }
 
 bool Client::connectToServer() {
@@ -132,18 +129,20 @@ bool Client::connectToServer() {
 }
 
 bool Client::createUserConnection(User *user) {
-    partner->connectToHost(user->getHost(), CLIENT_PORT);
-    return partner->waitForConnected();
+    partner = user;
+    partnerSocket = new QUdpSocket(this);
+    bool res = partnerSocket->bind(partner->getHost(), CLIENT_PORT);
+    connect(partnerSocket, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
+    return res;
 }
 
 void Client::clientReadyRead() {
-    while (partner->hasPendingDatagrams()) {
-        emit dataRecieved(partner->readAll());
+    while (partnerSocket->hasPendingDatagrams()) {
+        QByteArray data;
+        data.resize(partnerSocket->pendingDatagramSize());
+        partnerSocket->readDatagram(data.data(), partnerSocket->pendingDatagramSize());
+        emit dataRecieved(partnerSocket->readAll());
     }
-}
-
-void Client::clientConnectionEstablished() {
-    connect(partner, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
 }
 
 void Client::setLogin(QString newLogin) {
