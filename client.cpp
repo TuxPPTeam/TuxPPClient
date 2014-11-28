@@ -3,14 +3,27 @@
 #include <QUdpSocket>
 #include <QTcpServer>
 #include <QMessageBox>
+#include <QSslConfiguration>
 
 Client::Client(QObject *parent) :
     QObject(parent),
     ready(false),
-    server(new QTcpSocket(this)),
+    server(new QSslSocket(this)),
     partner(NULL),
     partnerSocket(NULL)
 {
+//    QSslCertificate cert = QSslCertificate::fromPath("ca.crt");
+    
+    QSslCertificate ca = QSslCertificate::fromPath("../certs/labak/ca.crt").first();
+    server->addCaCertificate(ca);
+    QSslCertificate servCert = QSslCertificate::fromPath("../certs/labak/server.crt").first();
+//    server->setLocalCertificate("../certs/labak/server.crt");
+//    server->setPrivateKey("../certs/labak/server.key");
+    QList<QSslError> errors;
+    QSslError error(QSslError::HostNameMismatch, servCert);
+    errors.append(error);
+    server->ignoreSslErrors(errors);
+//    server->setLocalCertificate();
 }
 
 Client::~Client() {
@@ -117,8 +130,11 @@ bool Client::isClientConnected() {
 
 bool Client::connectToServer() {
     qDebug() << "Client::connectToServer()";
-    server->connectToHost(serverAddress, SERVER_PORT);
+    server->connectToHostEncrypted(serverAddress, SERVER_PORT);
     bool res = server->waitForConnected();
+    qDebug() << "Connection established:" << res;
+    qDebug() << "Encryption:" << server->waitForEncrypted();
+    qDebug() << "Error:" << server->error() << server->errorString();
     if (res) {
         connect(server, SIGNAL(disconnected()), this, SIGNAL(serverDisconnected()));
         connect(server, SIGNAL(readyRead()), this, SLOT(serverReadyRead()));

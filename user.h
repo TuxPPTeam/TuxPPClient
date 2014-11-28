@@ -5,6 +5,8 @@
 #include <QSslSocket>
 #include <QHostAddress>
 
+#define ENCRYPTED
+
 #ifdef ENCRYPTED
     typedef QSslSocket QSocket;
 #else
