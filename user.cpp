@@ -18,6 +18,15 @@ User::User(QObject *parent, qint64 ID, QString userName, QByteArray pubKey, QHos
     this->host = host;
 }
 
+User::User(QObject *parent, QString userName, QByteArray pubKey, QSsl::KeyAlgorithm alg, QHostAddress host) :
+    QObject(parent)
+{
+    this->ID = -1;
+    setUsername(userName);
+    this->key = QSslKey(pubKey, alg);
+    this->host = host;
+}
+
 // #################################################################################
 bool User::setID(const qint64 newID) {
     if (ID != -1) {

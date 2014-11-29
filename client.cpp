@@ -4,26 +4,22 @@
 #include <QTcpServer>
 #include <QMessageBox>
 #include <QSslConfiguration>
+#include <fstream>
+#include <iostream>
+#include <QFile>
+
 
 Client::Client(QObject *parent) :
     QObject(parent),
     ready(false),
-    server(new QSslSocket(this)),
+    socket(new QSocket(this)),
     partner(NULL),
     partnerSocket(NULL)
 {
-//    QSslCertificate cert = QSslCertificate::fromPath("ca.crt");
     
-    QSslCertificate ca = QSslCertificate::fromPath("../certs/labak/ca.crt").first();
-    server->addCaCertificate(ca);
-    QSslCertificate servCert = QSslCertificate::fromPath("../certs/labak/server.crt").first();
-//    server->setLocalCertificate("../certs/labak/server.crt");
-//    server->setPrivateKey("../certs/labak/server.key");
-    QList<QSslError> errors;
-    QSslError error(QSslError::HostNameMismatch, servCert);
-    errors.append(error);
-    server->ignoreSslErrors(errors);
-//    server->setLocalCertificate();
+    setSsl();
+    connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(errorOccured(QList<QSslError>)));
+    connect(socket, SIGNAL(encrypted()), this, SLOT(socketReady()));
 }
 
 Client::~Client() {
@@ -40,14 +36,14 @@ void Client::sendRequest(Command cmd, QString request) {
     QByteArray message(request.toLocal8Bit());
     message.prepend((char*)&cmd, 1);
     qDebug() << "Sending: " << request;
-    int written = server->write(message);
-    server->waitForBytesWritten();
+    int written = socket->write(message);
+    socket->waitForBytesWritten();
     qDebug() << "Written: " << written << " bytes.";
 }
 
 void Client::serverReadyRead() {
     qDebug() << "Client::readyRead()";
-    QByteArray data = server->readAll();
+    QByteArray data = socket->readAll();
     lastMessage = data;
 
     if (data.isEmpty()) {
@@ -102,8 +98,9 @@ void Client::getUserList(QByteArray data) {
     QList<QByteArray> tokens = data.split(commandDelimiter);
 
     users.clear();
-    for (int i = 0; i < tokens.count() / 3; ++i) {
-        User *u = new User(this, tokens[i*3], tokens[i*3+1], QHostAddress(QString(tokens[i*3+2])));
+    for (int i = 0; i < tokens.count() / 4; ++i) {
+
+        User *u = new User(this, tokens[i*4], tokens[i*4+1], QSsl::Rsa, QHostAddress(QString(tokens[i*4+3])));
         users.append(u);
     }
 
@@ -120,7 +117,7 @@ bool Client::sendData(QByteArray data) {
 
 bool Client::isServerConnected() {
     qDebug() << "Client::isServerConnected()";
-    return server->isOpen();
+    return socket->isOpen();
 }
 
 bool Client::isClientConnected() {
@@ -130,15 +127,13 @@ bool Client::isClientConnected() {
 
 bool Client::connectToServer() {
     qDebug() << "Client::connectToServer()";
-    server->connectToHostEncrypted(serverAddress, SERVER_PORT);
-    bool res = server->waitForConnected();
-    qDebug() << "Connection established:" << res;
-    qDebug() << "Encryption:" << server->waitForEncrypted();
-    qDebug() << "Error:" << server->error() << server->errorString();
-    if (res) {
-        connect(server, SIGNAL(disconnected()), this, SIGNAL(serverDisconnected()));
-        connect(server, SIGNAL(readyRead()), this, SLOT(serverReadyRead()));
-    }
+    socket->connectToHostEncrypted(serverAddress, SERVER_PORT);
+
+    bool res = socket->waitForEncrypted();
+    qDebug() << "Connection established:" << socket->waitForConnected();
+    qDebug() << "Encryption:" << res;
+    qDebug() << "Error:" << socket->error() << socket->errorString();
+
     return res;
 }
 
@@ -193,4 +188,49 @@ QString Client::getKeyFileName() {
 
 int Client::getUsersCount() {
     return users.count();
+}
+
+void Client::setSsl()
+{
+    QSslCertificate ca = QSslCertificate::fromPath("../certs/ca.crt").first();
+    if (ca.isNull())
+    {
+        qDebug() << "Failed to load CA certificate";
+    }
+    socket->addCaCertificate(ca);
+    QSslCertificate clientCert = QSslCertificate::fromPath("../certs/maros.pem").first();
+    if (clientCert.isNull())
+    {
+        qDebug() << "Failed to load CLIENT certificate";
+    }
+    QFile o("pubkey.txt");
+    o.open(QIODevice::WriteOnly);
+    o.write(clientCert.publicKey().toPem());
+    o.close();
+
+    socket->setLocalCertificate(clientCert);
+    socket->setPrivateKey("../certs/maros_privkey.pem");
+
+    /*QList<QSslError> errors;
+    errors.append( QSslError(QSslError::CertificateUntrusted, clientCert));
+    socket->ignoreSslErrors(errors);*/
+    socket->ignoreSslErrors();
+}
+
+void Client::errorOccured(QList<QSslError> errors) {
+    QSocket *socket = qobject_cast<QSocket*>(sender());
+    foreach (QSslError error, errors) {
+        qDebug() << "SSL error during hadshake: " << error.errorString();
+    }
+    socket->ignoreSslErrors();
+}
+
+void Client::socketReady() {
+    // Get calling socket
+    QSocket *socket = qobject_cast<QSocket*>(sender());
+    qDebug() << socket->peerAddress() << " connected.";
+
+    // Start receiving data
+    connect(socket, SIGNAL(disconnected()), this, SIGNAL(serverDisconnected()));
+    connect(socket, SIGNAL(readyRead()), this, SLOT(serverReadyRead()));
 }

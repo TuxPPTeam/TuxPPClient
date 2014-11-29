@@ -2,6 +2,7 @@
 #define USER_H
 
 #include <QObject>
+#include <QSslKey>
 #include <QSslSocket>
 #include <QHostAddress>
 
@@ -19,6 +20,8 @@ class User : public QObject
 public:
     explicit User(QObject *parent = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
     explicit User(QObject *parent = 0, qint64 = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
+    explicit User(QObject *parent = 0, QString userName = "", QByteArray pubKey = NULL, QSsl::KeyAlgorithm alg = QSsl::Rsa, QHostAddress host = QHostAddress::Null);
+    
 
     qint64 getID() const;
     QString getUsername() const;
@@ -39,6 +42,7 @@ private:
     qint64 ID;
     QString username;
     QByteArray pubKey;
+    QSslKey key;
     QHostAddress host;
 
     static const unsigned int MAX_USERNAME_LENGTH = 32;

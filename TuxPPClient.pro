@@ -2,11 +2,12 @@ QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra
 QT       += core gui network
 QT += testlib
 
+QT_CONFIG_FLAGS += -openssl-linked
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = TuxPPClient
 TEMPLATE = app
-
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -20,6 +21,7 @@ SOURCES += main.cpp\
     havege.c \
     sha512.c \
     timing.c
+
 
 HEADERS  += mainwindow.h \
     cryptor.h \
@@ -37,3 +39,5 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     loginscreen.ui
+
+LIBS += -L"C:\OpenSSL" -llibeay32

@@ -85,7 +85,7 @@ void LoginScreen::on_registerBtn_clicked()
  
     if (cl->connectToServer()) {
         connect(cl, SIGNAL(displayMsg(QString,QString)),    this, SLOT(displayMsg(QString,QString)));
-        cl->sendRequest(REGISTER, cl->getLogin() + commandDelimiter + cl->getKeyFileName());
+        cl->sendRequest(REGISTER, cl->getLogin());
     }
     else {
         displayMsg("Connection error", "Unable to connect to server.");

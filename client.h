@@ -7,6 +7,7 @@
 #include <QSslSocket>
 #include <QUdpSocket>
 #include <QHostAddress>
+//#include <QtNetwork>
 
 static const int SERVER_PORT = 1234;
 static const int CLIENT_PORT = 4321;
@@ -39,12 +40,13 @@ public:
     void setReady(bool isReady) { ready = isReady; }
     int getUsersCount();
 
+    void setSsl();
 private:
     QString username;
     QString keyFile;
     bool ready;
     QList<User*> users;
-    QSocket *server;
+    QSocket *socket;
     QUdpSocket *partnerSocket;
     User *partner;
     QByteArray lastMessage;
@@ -63,8 +65,10 @@ signals:
 public slots:
 
 private slots:
+    void errorOccured(QList<QSslError>);
     void serverReadyRead();
     void clientReadyRead();
+    void socketReady();
 };
 
 #endif // CLIENT_H
