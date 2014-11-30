@@ -2,8 +2,12 @@
 #define CRYPTOR_H
 
 #include "polarssl/aes.h"
+#include <iostream>
 #include <QObject>
+#include <QThreadPool>
 #include <QFuture>
+#include <QFutureWatcher>
+#include <QByteArray>
 
 typedef unsigned char byte;
 
@@ -11,16 +15,16 @@ class Cryptor : public QObject
 {
     Q_OBJECT
 public:
-    explicit Cryptor(QObject *parent = 0);
     explicit Cryptor(byte *key, byte *iv, QObject *parent = 0);
     ~Cryptor();
     size_t process(byte *in, byte *out, size_t size);
+    void prepare();
     static void benchmark(size_t megabytes);
-
-    QByteArray generateRandom(size_t size);
-    QByteArray makeKey(QByteArray data1, QByteArray data2);
-    QByteArray encryptRSA(QByteArray input/*, rsa_context rsa_ctx*/);
-    QByteArray decryptRSA(QByteArray input);
+    static QByteArray makeKey(QByteArray data1, QByteArray data2);
+    static QByteArray makeHmac(QByteArray in, QByteArray key);
+    static QByteArray generateRandom(size_t size);
+    static QByteArray encryptRSA(QByteArray data, QByteArray pubKey);
+    static QByteArray decryptRSA(QByteArray data, QString keyfile);
     
 private:
     static const size_t SIZE = (1 << 20) * 100;

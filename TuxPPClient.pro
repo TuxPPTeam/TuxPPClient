@@ -20,7 +20,21 @@ SOURCES += main.cpp\
     aes.c \
     havege.c \
     sha512.c \
-    timing.c
+    timing.c \
+    asn1parse.c \
+    base64.c \
+    bignum.c \
+    ctr_drbg.c \
+    entropy_poll.c \
+    entropy.c \
+    md_wrap.c \
+    md.c \
+    oid.c \
+    pem.c \
+    pk_wrap.c \
+    pk.c \
+    pkparse.c \
+    rsa.c
 
 
 HEADERS  += mainwindow.h \
