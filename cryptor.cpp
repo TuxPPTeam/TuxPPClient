@@ -1,9 +1,11 @@
 #include "cryptor.h"
-#include "polarssl/config.h"
-#include "polarssl/sha512.h"
-#include "polarssl/entropy.h"
-#include "polarssl/ctr_drbg.h"
-#include "polarssl/pk.h"
+#include <polarssl/rsa.h>
+#include <polarssl/aes.h>
+#include <polarssl/sha2.h>
+#include <polarssl/sha4.h>
+#include <polarssl/entropy.h>
+#include <polarssl/ctr_drbg.h>
+#include <polarssl/x509.h>
 
 #include <QFile>
 #include <cstdlib>
@@ -26,7 +28,7 @@ Cryptor::Cryptor(byte *key, byte *iv, QObject *parent) :
     memcpy(counter.data, iv, BLOCK_SIZE);
     aes_setkey_enc(&ctx, key, KEY_SIZE * 8);
 
-    availableBytes += precompute(SIZE);
+    availableBytes += precompute(PREPARE_BLOCK_SIZE);
 }
 
 Cryptor::~Cryptor() {
@@ -35,7 +37,7 @@ Cryptor::~Cryptor() {
     precompResult.waitForFinished();
     memset(precomp, 0, SIZE);
     memset(counter.data, 0, BLOCK_SIZE);
-    aes_free(&ctx);
+//    aes_free(&ctx);
     delete[] precomp;
 }
 
@@ -161,7 +163,7 @@ QByteArray Cryptor::makeKey(QByteArray data1, QByteArray data2) {
     memcpy(toHash, data1.constData(), 200 / 8);
     memcpy(toHash + 200 / 8, data2.constData(), 200 / 8);
     
-    sha512(toHash, bytes, result, 1);
+    sha4(toHash, bytes, result, 1);
     
     return QByteArray((char*) result, 384 / 8);
 }
@@ -173,15 +175,11 @@ QByteArray Cryptor::makeKey(QByteArray data1, QByteArray data2) {
  * @return 
  */
 QByteArray Cryptor::makeHmac(QByteArray in, QByteArray key) {
-    byte out[512 / 8];
-    sha512_hmac((byte*) key.constData(), 16, (byte*) in.constData(), in.size(), out, 1);
+    byte out[256 / 8];
+    sha2_hmac((byte*) key.constData(), 16, (byte*) in.constData(), in.size(), out, 0);
     
-    return QByteArray((char*) out, 512 / 8);
+    return QByteArray((char*) out, 256 / 8);
 }
-
-/*
- * ALL THE CODE BELOW IS HACKED SO BADLY...
- */
 
 // just a quick solution from https://polarssl.org/kb/how-to/generate-an-aes-key
 QByteArray generateRandom(size_t size) {
@@ -198,7 +196,7 @@ QByteArray generateRandom(size_t size) {
     {
         qDebug() << "Random generation init failed!";
 //        printf( " failed\n ! ctr_drbg_init returned -0x%04x\n", -ret );
-        ctr_drbg_free(&ctr_drbg);
+//        ctr_drbg_free(&ctr_drbg);
         return QByteArray();
     }
     
@@ -206,11 +204,11 @@ QByteArray generateRandom(size_t size) {
     {
         qDebug() << "Random generation failed!";
 //        printf( " failed\n ! ctr_drbg_random returned -0x%04x\n", -ret );
-        ctr_drbg_free(&ctr_drbg);
+//        ctr_drbg_free(&ctr_drbg);
         return QByteArray();
     }
     
-    ctr_drbg_free(&ctr_drbg);
+//    ctr_drbg_free(&ctr_drbg);
     return QByteArray((char*) data, size);
 }
 
@@ -222,101 +220,45 @@ QByteArray generateRandom(size_t size) {
  * @return 
  */
 QByteArray Cryptor::encryptRSA(QByteArray data, QByteArray pubKey) {
-    QFile pkfile("tmp.pub");
-    pkfile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    pkfile.write(pubKey);
-    pkfile.close();
-    
-    int ret = 0;
-    pk_context pk;
     ctr_drbg_context ctr_drbg;
     entropy_context entropy;
     
     entropy_init( &entropy );
     ctr_drbg_init(&ctr_drbg, entropy_func, &entropy,
                   (unsigned char *) "hello", strlen("hello") );
-
-    pk_init( &pk );
-
-    /*
-     * Read the RSA public key
-     */
-    if( ( ret = pk_parse_public_keyfile( &pk, "tmp.pub" ) ) != 0 )
-    {
-        qDebug() << "encryptRSA Reading public key failed!";
-//        printf( " failed\n  ! pk_parse_public_keyfile returned -0x%04x\n", -ret );
-        return QByteArray();
-    }
     
-    unsigned char buf[POLARSSL_MPI_MAX_SIZE];
-    size_t olen = 0;
-
-    /*
-     * Calculate the RSA encryption of the data.
-     */
-    qDebug() << "Calculating encryption";
-//    fflush( stdout );
-
-    if( ( ret = pk_encrypt( &pk, (const unsigned char*) data.constData(), data.size(),
-                            buf, &olen, sizeof(buf),
-                            ctr_drbg_random, &ctr_drbg ) ) != 0 )
-    {
-        qDebug() << "Encryption failed!";
-//        printf( " failed\n  ! pk_encrypt returned -0x%04x\n", -ret );
-        return QByteArray();
-    }
+    rsa_context ctx;
+    byte out[2048 / 8];
+    rsa_init(&ctx, RSA_PKCS_V15, 0 /*ignored*/);
+    qDebug() << "Public key parsing result:" << x509parse_public_key(&ctx, (const byte*) pubKey.constData(), pubKey.size());
+    qDebug() << "Encryption result:" << rsa_pkcs1_encrypt(&ctx, ctr_drbg_random, &ctr_drbg, RSA_PUBLIC, 
+                                  data.size(), (const byte*) data.constData(), out);
     
-    ctr_drbg_free(&ctr_drbg);
-    entropy_free(&entropy);
-    pkfile.remove();
-    pk_free(&pk);
-    
-    return QByteArray((char*) buf, olen);
+    return QByteArray((char*) out, 2048 / 8);
 }
 
-// https://polarssl.org/kb/how-to/encrypt-and-decrypt-with-rsa
+/**
+ * @brief Cryptor::decryptRSA
+ * @param data 256 bytes
+ * @param keyfile PEM encoded
+ * @return 
+ */
 QByteArray Cryptor::decryptRSA(QByteArray data, QString keyfile) {
-    int ret = 0;
-    pk_context pk;
     ctr_drbg_context ctr_drbg;
     entropy_context entropy;
     
     entropy_init( &entropy );
     ctr_drbg_init(&ctr_drbg, entropy_func, &entropy,
                   (unsigned char *) "hello", strlen("hello") );
-
-    pk_init( &pk );
-
-    /*
-     * Read the RSA privatekey
-     */
-    if( ( ret = pk_parse_keyfile( &pk, keyfile.toStdString().c_str(), "" ) ) != 0 )
-    {
-        qDebug() << "decryptRSA Reading private key failed!";
-//        printf( " failed\n  ! pk_parse_keyfile returned -0x%04x\n", -ret );
-        return QByteArray();
-    }
-    
-    unsigned char result[POLARSSL_MPI_MAX_SIZE];
+    rsa_context ctx;
     size_t olen = 0;
-
-    /*
-     * Calculate the RSA encryption of the data.
-     */
-//    printf( "\n  . Generating the encrypted value" );
-//    fflush( stdout );
-
-    if( ( ret = pk_decrypt( &pk, (const unsigned char*) data.constData(), data.size(), result, &olen, sizeof(result),
-                            ctr_drbg_random, &ctr_drbg ) ) != 0 )
-    {
-        qDebug() << "Decryption failed!";
-//        printf( " failed\n  ! pk_decrypt returned -0x%04x\n", -ret );
-//        goto exit;
-    }
+    byte dec[2048 / 8];
     
-    ctr_drbg_free(&ctr_drbg);
-    entropy_free(&entropy);
-    pk_free(&pk);
+    rsa_init(&ctx, RSA_PKCS_V15, 0 /*ignored*/);
+    qDebug() << "Private key parsing result:" << x509parse_keyfile(&ctx, keyfile.toStdString().c_str(), NULL);
     
-    return QByteArray((char*) result, olen);
+    qDebug() << "Decryption result:" << rsa_pkcs1_decrypt(&ctx, ctr_drbg_random, &ctr_drbg, RSA_PRIVATE, 
+                                                          &olen, (const byte*) data.constData(), dec, 2048 / 8);
+    
+    return QByteArray((char*) dec, olen);
 }

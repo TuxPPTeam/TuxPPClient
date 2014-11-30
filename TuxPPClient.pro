@@ -16,25 +16,7 @@ SOURCES += main.cpp\
     client.cpp \
     tests.cpp \
     loginscreen.cpp \
-    userlistmodel.cpp \
-    aes.c \
-    havege.c \
-    sha512.c \
-    timing.c \
-    asn1parse.c \
-    base64.c \
-    bignum.c \
-    ctr_drbg.c \
-    entropy_poll.c \
-    entropy.c \
-    md_wrap.c \
-    md.c \
-    oid.c \
-    pem.c \
-    pk_wrap.c \
-    pk.c \
-    pkparse.c \
-    rsa.c
+    userlistmodel.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -43,15 +25,9 @@ HEADERS  += mainwindow.h \
     client.h \
     tests.h \
     loginscreen.h \
-    userlistmodel.h \
-    polarssl/aes.h \
-    polarssl/check_config.h \
-    polarssl/config.h \
-    polarssl/havege.h \
-    polarssl/sha512.h \
-    polarssl/timing.h
+    userlistmodel.h
 
 FORMS    += mainwindow.ui \
     loginscreen.ui
 
-LIBS += -L"C:\OpenSSL" -llibeay32
+LIBS += -L"C:\OpenSSL" -llibeay32 -lpolarssl
