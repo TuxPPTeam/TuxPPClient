@@ -11,10 +11,16 @@ class Cryptor : public QObject
 {
     Q_OBJECT
 public:
+    explicit Cryptor(QObject *parent = 0);
     explicit Cryptor(byte *key, byte *iv, QObject *parent = 0);
     ~Cryptor();
     size_t process(byte *in, byte *out, size_t size);
     static void benchmark(size_t megabytes);
+
+    QByteArray generateRandom(size_t size);
+    QByteArray makeKey(QByteArray data1, QByteArray data2);
+    QByteArray encryptRSA(QByteArray input/*, rsa_context rsa_ctx*/);
+    QByteArray decryptRSA(QByteArray input);
     
 private:
     static const size_t SIZE = (1 << 20) * 100;

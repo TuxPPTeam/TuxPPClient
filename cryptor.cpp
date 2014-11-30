@@ -5,6 +5,11 @@
 #include <QtCore>
 #include <QtConcurrent/QtConcurrent>
 
+Cryptor::Cryptor(QObject *parent) :
+    QObject(parent)
+{
+}
+
 Cryptor::Cryptor(byte *key, byte *iv, QObject *parent) :
     QObject(parent),
     availableBytes(0),
@@ -138,4 +143,24 @@ void Cryptor::benchmark(size_t megabytes) {
     delete message;
     delete encrypted;
     delete decrypted;
+}
+
+QByteArray Cryptor::generateRandom(size_t size) {
+    QByteArray result;
+    for (unsigned i = 0; i < size; ++i) {
+        result.append('a'+i);
+    }
+    return result;
+}
+
+QByteArray Cryptor::makeKey(QByteArray data1, QByteArray data2) {
+    return data1.append(data2);
+}
+
+QByteArray Cryptor::encryptRSA(QByteArray input) {
+    return input;
+}
+
+QByteArray Cryptor::decryptRSA(QByteArray input) {
+    return input;
 }

@@ -54,7 +54,7 @@ void MainWindow::on_connectButton_clicked()
     QModelIndex index = ui->listView->currentIndex();
     User *u = model->getUser(index);
     if (u != NULL) {
-        if (client->createUserConnection(u)) {
+        if (client->connectToUSer(u)) {
             ui->connectedLabel->setText("Connected to: " + u->getUsername());
         }
     }

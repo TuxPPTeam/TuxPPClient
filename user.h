@@ -20,7 +20,7 @@ class User : public QObject
 public:
     explicit User(QObject *parent = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
     explicit User(QObject *parent = 0, qint64 = 0, QString userName = NULL, QByteArray pubKey = NULL, QHostAddress host = QHostAddress::Null);
-    explicit User(QObject *parent = 0, QString userName = "", QByteArray pubKey = NULL, QSsl::KeyAlgorithm alg = QSsl::Rsa, QHostAddress host = QHostAddress::Null);
+    explicit User(QObject *parent = 0, qint64 = 0, QString userName = NULL, QByteArray pubKey = NULL, QSsl::KeyAlgorithm alg = QSsl::Rsa, QHostAddress host = QHostAddress::Null);
     
 
     qint64 getID() const;

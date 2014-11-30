@@ -11,6 +11,7 @@
 
 Client::Client(QObject *parent) :
     QObject(parent),
+    cryptor(new Cryptor(this)),
     ready(false),
     socket(new QSocket(this)),
     partner(NULL),
@@ -58,6 +59,7 @@ void Client::serverReadyRead() {
         //case LOGOUT:    logout(data.mid(sizeof(Command)), socket); break;
         case REGISTER:  registerUser(data.mid(1)); break;
         case GETUSERS:  getUserList(data.mid(1)); break;
+        case GENKEY:    createUserConnection(data.mid(1)); break;
         default:        emit dataRecieved(data);
     }
 }
@@ -70,6 +72,7 @@ void Client::login(QByteArray data) {
     }
 
     if (data[0] == '\1') {
+        myID = data.mid(1).toLong();
         emit loginSuccessful();
     }
     else {
@@ -98,9 +101,9 @@ void Client::getUserList(QByteArray data) {
     QList<QByteArray> tokens = data.split(commandDelimiter);
 
     users.clear();
-    for (int i = 0; i < tokens.count() / 4; ++i) {
+    for (int i = 0; i < tokens.count() / 5; ++i) {
 
-        User *u = new User(this, tokens[i*4], tokens[i*4+1], QSsl::Rsa, QHostAddress(QString(tokens[i*4+3])));
+        User *u = new User(this, tokens[i*5].toLong(), tokens[i*5+1], tokens[i*5+2], QSsl::Rsa, QHostAddress(QString(tokens[i*5+4])));
         users.append(u);
     }
 
@@ -137,8 +140,42 @@ bool Client::connectToServer() {
     return res;
 }
 
-bool Client::createUserConnection(User *user) {
+bool Client::connectToUSer(User *user) {
     partner = user;
+    QByteArray data(cryptor->encryptRSA(cryptor->generateRandom(10)));
+    halfKey = data;
+    QByteArray myIdByte;
+    QByteArray partnerIdByte;
+    QByteArray message;
+    message.append(myIdByte.setNum(myID))
+           .append(commandDelimiter)
+           .append(partnerIdByte.setNum(user->getID()))
+           .append(commandDelimiter)
+           .append(data);
+    sendRequest(GENKEY, message);
+}
+
+bool Client::createUserConnection(QByteArray data) {
+    if (partner == NULL)
+        return false;
+
+    if (halfKey == NULL) {
+        QByteArray myHalfKey = cryptor->generateRandom(10);
+        QList<QByteArray> tokens = data.split(commandDelimiter);
+        QByteArray myIdByte;
+        halfKey = myHalfKey;
+        QByteArray message;
+        message.append(myIdByte.setNum(myID))
+                .append(commandDelimiter)
+                .append(tokens[0])
+                .append(commandDelimiter)
+                .append(tokens[1]);
+        sendRequest(GENKEY, message);
+    }
+
+    QByteArray sessionKey = cryptor->makeKey(halfKey, cryptor->decryptRSA(data.mid(data.indexOf(commandDelimiter)+1)));
+    halfKey = NULL;
+
     bool res;
     if (partnerSocket == NULL) {
         partnerSocket = new QUdpSocket(this);
@@ -193,28 +230,16 @@ int Client::getUsersCount() {
 void Client::setSsl()
 {
     QSslCertificate ca = QSslCertificate::fromPath("../certs/ca.crt").first();
-    if (ca.isNull())
-    {
+    if (ca.isNull()) {
         qDebug() << "Failed to load CA certificate";
     }
     socket->addCaCertificate(ca);
     QSslCertificate clientCert = QSslCertificate::fromPath("../certs/maros.pem").first();
-    if (clientCert.isNull())
-    {
+    if (clientCert.isNull()) {
         qDebug() << "Failed to load CLIENT certificate";
     }
-    QFile o("pubkey.txt");
-    o.open(QIODevice::WriteOnly);
-    o.write(clientCert.publicKey().toPem());
-    o.close();
-
     socket->setLocalCertificate(clientCert);
     socket->setPrivateKey("../certs/maros_privkey.pem");
-
-    /*QList<QSslError> errors;
-    errors.append( QSslError(QSslError::CertificateUntrusted, clientCert));
-    socket->ignoreSslErrors(errors);*/
-    socket->ignoreSslErrors();
 }
 
 void Client::errorOccured(QList<QSslError> errors) {
@@ -222,7 +247,7 @@ void Client::errorOccured(QList<QSslError> errors) {
     foreach (QSslError error, errors) {
         qDebug() << "SSL error during hadshake: " << error.errorString();
     }
-    socket->ignoreSslErrors();
+    socket->ignoreSslErrors(errors);
 }
 
 void Client::socketReady() {

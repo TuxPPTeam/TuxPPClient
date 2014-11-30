@@ -2,6 +2,7 @@
 #define CLIENT_H
 
 #include "user.h"
+#include "cryptor.h"
 
 #include <QObject>
 #include <QSslSocket>
@@ -16,7 +17,7 @@ static const QString serverAddress = QString("::1");
 //static const QHostAddress serverAddress("147.251.44.155");
 static const char commandDelimiter = '\31';
 
-enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS };
+enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS, GENKEY };
 
 class Client : public QObject
 {
@@ -27,7 +28,7 @@ public:
     ~Client();
 
     void sendRequest(Command cmd, QString request);
-    bool createUserConnection(User *user);
+    bool connectToUSer(User *user);
     void closeUserConnection();
     bool sendData(QByteArray data);
     bool isServerConnected();
@@ -42,6 +43,8 @@ public:
 
     void setSsl();
 private:
+    qint64 myID;
+    Cryptor *cryptor;
     QString username;
     QString keyFile;
     bool ready;
@@ -50,10 +53,13 @@ private:
     QUdpSocket *partnerSocket;
     User *partner;
     QByteArray lastMessage;
+    QByteArray halfKey;
 
     void login(QByteArray);
     void getUserList(QByteArray);
     void registerUser(QByteArray);
+
+    bool createUserConnection(QByteArray data);
 
 signals:
     void dataRecieved(QByteArray);
