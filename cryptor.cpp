@@ -1,11 +1,12 @@
 #include "cryptor.h"
 #include <polarssl/rsa.h>
 #include <polarssl/aes.h>
-#include <polarssl/sha2.h>
-#include <polarssl/sha4.h>
+#include <polarssl/sha256.h>
+#include <polarssl/sha512.h>
 #include <polarssl/entropy.h>
 #include <polarssl/ctr_drbg.h>
 #include <polarssl/x509.h>
+#include <polarssl/compat-1.2.h>
 
 #include <QFile>
 #include <cstdlib>
@@ -163,7 +164,7 @@ QByteArray Cryptor::makeKey(QByteArray data1, QByteArray data2) {
     memcpy(toHash, data1.constData(), 200 / 8);
     memcpy(toHash + 200 / 8, data2.constData(), 200 / 8);
     
-    sha4(toHash, bytes, result, 1);
+    sha512(toHash, bytes, result, 1);
     
     return QByteArray((char*) result, 384 / 8);
 }
@@ -176,13 +177,13 @@ QByteArray Cryptor::makeKey(QByteArray data1, QByteArray data2) {
  */
 QByteArray Cryptor::makeHmac(QByteArray in, QByteArray key) {
     byte out[256 / 8];
-    sha2_hmac((byte*) key.constData(), 16, (byte*) in.constData(), in.size(), out, 0);
+    sha256_hmac((byte*) key.constData(), 16, (byte*) in.constData(), in.size(), out, 0);
     
     return QByteArray((char*) out, 256 / 8);
 }
 
 // just a quick solution from https://polarssl.org/kb/how-to/generate-an-aes-key
-QByteArray generateRandom(size_t size) {
+QByteArray Cryptor::generateRandom(size_t size) {
     ctr_drbg_context ctr_drbg;
     entropy_context entropy;
     unsigned char *data = new byte[size];

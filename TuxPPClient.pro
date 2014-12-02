@@ -30,4 +30,4 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     loginscreen.ui
 
-LIBS += -L"C:\OpenSSL" -llibeay32 -lpolarssl
+LIBS += -L"C:\OpenSSL" -lpolarssl  #-llibeay32

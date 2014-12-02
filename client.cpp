@@ -11,7 +11,7 @@
 
 Client::Client(QObject *parent) :
     QObject(parent),
-    cryptor(new Cryptor(this)),
+    //cryptor(),
     ready(false),
     socket(new QSocket(this)),
     partner(NULL),
@@ -130,7 +130,7 @@ bool Client::isClientConnected() {
 
 bool Client::connectToServer() {
     qDebug() << "Client::connectToServer()";
-    socket->connectToHostEncrypted(serverAddress, SERVER_PORT);
+    socket->connectToHostEncrypted(serverAddress.toString(), SERVER_PORT);
 
     bool res = socket->waitForEncrypted();
     qDebug() << "Connection established:" << socket->waitForConnected();
@@ -142,8 +142,8 @@ bool Client::connectToServer() {
 
 bool Client::connectToUSer(User *user) {
     partner = user;
-    QByteArray data(cryptor->encryptRSA(cryptor->generateRandom(10)));
-    halfKey = data;
+    halfKey = Cryptor::generateRandom(200);
+    QByteArray data = Cryptor::encryptRSA(halfKey, user->getPubKey());
     QByteArray myIdByte;
     QByteArray partnerIdByte;
     QByteArray message;
@@ -156,14 +156,13 @@ bool Client::connectToUSer(User *user) {
 }
 
 bool Client::createUserConnection(QByteArray data) {
-    if (partner == NULL)
+    if (partner != NULL)
         return false;
 
+    QList<QByteArray> tokens = data.split(commandDelimiter);
     if (halfKey == NULL) {
-        QByteArray myHalfKey = cryptor->generateRandom(10);
-        QList<QByteArray> tokens = data.split(commandDelimiter);
+        halfKey = Cryptor::generateRandom(200);
         QByteArray myIdByte;
-        halfKey = myHalfKey;
         QByteArray message;
         message.append(myIdByte.setNum(myID))
                 .append(commandDelimiter)
@@ -171,9 +170,11 @@ bool Client::createUserConnection(QByteArray data) {
                 .append(commandDelimiter)
                 .append(tokens[1]);
         sendRequest(GENKEY, message);
+        sessionKey = Cryptor::makeKey(Cryptor::decryptRSA(tokens[1], keyFile), halfKey);
     }
-
-    QByteArray sessionKey = cryptor->makeKey(halfKey, cryptor->decryptRSA(data.mid(data.indexOf(commandDelimiter)+1)));
+    else {
+        sessionKey = Cryptor::makeKey(halfKey, Cryptor::decryptRSA(tokens[1], keyFile));
+    }
     halfKey = NULL;
 
     bool res;
