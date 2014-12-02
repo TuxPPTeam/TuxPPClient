@@ -120,7 +120,7 @@ bool Client::sendData(QByteArray data) {
 
 bool Client::isServerConnected() {
     qDebug() << "Client::isServerConnected()";
-    return socket->isOpen();
+    return socket->isEncrypted();
 }
 
 bool Client::isClientConnected() {
@@ -156,7 +156,7 @@ bool Client::connectToUSer(User *user) {
 }
 
 bool Client::createUserConnection(QByteArray data) {
-    if (partner != NULL)
+    if (partner == NULL)
         return false;
 
     QList<QByteArray> tokens = data.split(commandDelimiter);

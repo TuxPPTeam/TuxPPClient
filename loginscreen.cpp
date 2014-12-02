@@ -43,7 +43,10 @@ void LoginScreen::on_loginBtn_clicked()
         cl->setKeyFileName(ui->fileBox->text());
     }
 
-    if (cl->connectToServer()) {
+    if (!cl->isServerConnected()) {
+        cl->connectToServer();
+    }
+    if (cl->isServerConnected()) {
         w = new MainWindow(this, cl);
         w->setWindowFlags(Qt::Window);
 
@@ -83,7 +86,10 @@ void LoginScreen::on_registerBtn_clicked()
         cl->setKeyFileName(ui->fileBox->text());
     }
  
-    if (cl->connectToServer()) {
+    if (!cl->isServerConnected()) {
+        cl->connectToServer();
+    }
+    if (cl->isServerConnected()) {
         connect(cl, SIGNAL(displayMsg(QString,QString)),    this, SLOT(displayMsg(QString,QString)));
         cl->sendRequest(REGISTER, cl->getLogin());
     }
