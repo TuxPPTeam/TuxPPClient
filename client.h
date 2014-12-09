@@ -17,7 +17,7 @@ static const QHostAddress serverAddress = QHostAddress::LocalHostIPv6;
 //static const QHostAddress serverAddress("147.251.44.155");
 static const char commandDelimiter = '\31';
 
-enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS, GENKEY };
+enum Command { ECHO, LOGIN, LOGOUT, REGISTER, GETUSERS, GENKEY, CONREQ, CONRESP, CONERR };
 
 class Client : public QObject
 {
@@ -61,6 +61,9 @@ private:
     void registerUser(QByteArray);
 
     bool createUserConnection(QByteArray data);
+    void connectionRequest(QByteArray data);
+    void connectionResponse(QByteArray data);
+    void connectionError(QByteArray data);
 
 signals:
     void dataRecieved(QByteArray);

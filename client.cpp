@@ -60,6 +60,9 @@ void Client::serverReadyRead() {
         case REGISTER:  registerUser(data.mid(1)); break;
         case GETUSERS:  getUserList(data.mid(1)); break;
         case GENKEY:    createUserConnection(data.mid(1)); break;
+        case CONREQ:    connectionRequest(data.mid(1)); break;
+        case CONRESP:   connectionResponse(data.mid(1)); break;
+        case CONERR:    connectionError(data.mid(1)); break;
         default:        emit dataRecieved(data);
     }
 }
@@ -152,7 +155,45 @@ bool Client::connectToUSer(User *user) {
            .append(partnerIdByte.setNum(user->getID()))
            .append(commandDelimiter)
            .append(data);
-    sendRequest(GENKEY, message);
+    sendRequest(CONREQ, message);
+}
+
+void Client::connectionRequest(QByteArray data) {
+    QList<QByteArray> tokens = data.split(commandDelimiter);
+    foreach (User *u, users) {
+        if (u->getID() == tokens[0].toLong()) {
+            partner = u;
+            halfKey = Cryptor::generateRandom(200);
+            QByteArray myIdByte;
+            QByteArray message;
+            message.append(myIdByte.setNum(myID))
+                    .append(commandDelimiter)
+                    .append(tokens[0])
+                    .append(commandDelimiter)
+                    .append(Cryptor::encryptRSA(halfKey, u->getPubKey()));
+
+            partnerSocket = new QUdpSocket(this);
+            if (partnerSocket->bind(partner->getHost(), CLIENT_PORT)) {
+                connect(partnerSocket, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
+                sendRequest(CONRESP, message);
+                sessionKey = Cryptor::makeKey(Cryptor::decryptRSA(tokens[2], keyFile), halfKey);
+                return;
+            }
+        }
+    }
+    sendRequest(CONERR, "User is not in user list!");
+}
+
+void Client::connectionResponse(QByteArray data) {
+    QList<QByteArray> tokens = data.split(commandDelimiter);
+    if (partnerSocket->bind(partner->getHost(), CLIENT_PORT)) {
+        connect(partnerSocket, SIGNAL(readyRead()), this, SLOT(clientReadyRead()));
+        sessionKey = Cryptor::makeKey(halfKey, Cryptor::decryptRSA(tokens[2], keyFile));
+    }
+}
+
+void Client::connectionError(QByteArray data) {
+
 }
 
 bool Client::createUserConnection(QByteArray data) {
