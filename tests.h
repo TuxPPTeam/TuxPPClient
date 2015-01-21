@@ -17,6 +17,7 @@ private slots:
     void testEncryption();
     void testDecryption();
     void testCryptoSpeed();
+    void testRSA();
 };
 
 #endif // TESTS_H

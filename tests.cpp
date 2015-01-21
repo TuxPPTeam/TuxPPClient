@@ -107,3 +107,15 @@ void Tests::testCryptoSpeed()
     c->benchmark(MEGABITES);
     delete c;
 }
+
+void Tests::testRSA()
+{
+    QByteArray bytes(240, 42);
+    QByteArray enc;
+    QByteArray dec;
+
+    enc = Cryptor::encryptRSA(bytes, QString("../certs/mates_pubkey.key"));
+    dec = Cryptor::decryptRSA(enc, "../certs/mates_privkey.pem");
+
+    QVERIFY(bytes == dec);
+}
