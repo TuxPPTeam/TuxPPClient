@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QThreadPool>
 #include <QFuture>
-#include <QFutureWatcher>
+//#include <QFutureWatcher>
 #include <QByteArray>
 
 typedef unsigned char byte;
@@ -18,14 +18,16 @@ public:
     explicit Cryptor(byte *key, byte *iv, QObject *parent = 0);
     ~Cryptor();
     size_t process(byte *in, byte *out, size_t size);
+    size_t drop(size_t n);
     void prepare();
     static void benchmark(size_t megabytes);
     static QByteArray makeKey(QByteArray data1, QByteArray data2);
     static QByteArray makeHmac(QByteArray in, QByteArray key);
     static QByteArray generateRandom(size_t size);
     static QByteArray encryptRSA(QByteArray data, QByteArray pubKey);
+    static QByteArray encryptRSA(QByteArray data, QString pubKeyPath);
     static QByteArray decryptRSA(QByteArray data, QString keyfile);
-    
+
 private:
     static const size_t SIZE = (1 << 20) * 100;
     static const size_t BLOCK = SIZE / 8;
@@ -35,18 +37,23 @@ private:
     static const int KEY_SIZE = 16;
     size_t availableBytes;
     size_t newBytes;
-    
+
     QFuture<size_t> precompResult;
 //    QFutureWatcher<size_t> watcher;
-    
+
     byte *precomp;
     aes_context ctx;
     byte *next;
     byte *tomake;
-    
+
     union _counter {
         byte data[BLOCK_SIZE];
         quint64 halves[2];
+
+        _counter() {
+            halves[0] = 0;
+            halves[1] = 0;
+        }
 
         void operator++(int) {
             halves[0]++;
@@ -59,11 +66,11 @@ private:
     void makeBlock();
     void precomputeCheck(size_t wantedBytes);
     size_t precompute(size_t num);
-    
+
 signals:
-    
+
 public slots:
-    
+
 //private slots:
 //    void doPrecomputed();
 };
